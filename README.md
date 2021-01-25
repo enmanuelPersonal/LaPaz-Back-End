@@ -6,7 +6,7 @@ This project is built to maintain the inventory control of a funeral home, in wh
 
 - [MySql](https://www.apachefriends.org/es/index.html)
 - [npx](https://www.npmjs.com/package/npx)
-- [nodejs] (https://nodejs.org/es/)
+- [nodejs](https://nodejs.org/es/)
 
 ## Project Structure
 
