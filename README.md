@@ -48,8 +48,8 @@ If you want to be able to execute the project you will first need to install the
 
 - Run the server:
 
-```bash
-npm run dev
-```
+  ```bash
+  npm run dev
+  ```
 
 The local development server will be running at [localhost:8080](http://localhost:8080).
