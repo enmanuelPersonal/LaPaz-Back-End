@@ -10,6 +10,16 @@ const sequelize = new Sequelize(
   config.BASE_CONFIG
 );
 
+// sequelize
+//   .sync({
+//     logging: console.log,
+//     force: true,
+//   })
+//   .then(() => console.log("conectado"))
+//   .catch((error) => {
+//     console.error("No se pudo conectar:", error);
+//   });
+
 (async function () {
   try {
     await sequelize.authenticate();
