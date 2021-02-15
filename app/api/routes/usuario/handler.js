@@ -1,4 +1,5 @@
-const { Usuario } = require('../../../db/models/relaciones');
+const { sequelize } = require('../../../db/config/database');
+const { Usuario, TipoUsuario } = require('../../../db/models/relaciones');
 const { createEntidad } = require('../../helpers/entidad');
 // {
 //   "usuario": "EnmanuelEstrella22",
@@ -15,7 +16,7 @@ module.exports = {
     const {
       usuario,
       password,
-      idTipoUsuario,
+      idTipoUsuario = '',
       idEntidad = '',
       nombre = '',
       nacimiento = '',
@@ -23,51 +24,63 @@ module.exports = {
       correos = [],
       direcciones = [],
     } = req.body;
-    let data, entidad;
+    let data, getIdTipoUsuario;
 
     try {
-      const userExist = await Usuario.findOne({
-        where: { usuario },
+      await sequelize.transaction(async (transaction) => {
+        const userExist = await Usuario.findOne({
+          where: { usuario },
+        });
+
+        if (userExist) {
+          return res.status(409).send({
+            data: userExist,
+            message: 'Este Usuario ya esta registrado.',
+          });
+        }
+
+        if (!idTipoUsuario) {
+          getIdTipoUsuario = await TipoUsuario.findOne({
+            where: { tipo: 'cliente corriente' },
+          });
+        }
+
+        if (idEntidad) {
+          data = await Usuario.create(
+            {
+              usuario,
+              password,
+              idEntidad,
+              idTipoUsuario,
+            },
+            { transaction }
+          );
+        } else {
+          const { status, idEntidad } = await createEntidad({
+            nombre,
+            nacimiento,
+            telefonos,
+            correos,
+            direcciones,
+            transaction,
+          });
+
+          if (!status) {
+            return res.status(409).send(idEntidad);
+          }
+
+          data = await Usuario.create(
+            {
+              usuario,
+              password,
+              idEntidad,
+              idTipoUsuario: idTipoUsuario || getIdTipoUsuario.idTipoUsuario,
+            },
+            { transaction }
+          );
+        }
+        return res.status(201).send({ data });
       });
-
-      if (userExist) {
-        return res.status(409).send({
-          data: userExist,
-          message: 'Este Usuario ya esta registrado.',
-        });
-      }
-
-      if (idEntidad) {
-        data = await Usuario.create({
-          usuario,
-          password,
-          idEntidad,
-          idTipoUsuario,
-        });
-      } else {
-        entidad = await createEntidad({
-          nombre,
-          nacimiento,
-          telefonos,
-          correos,
-          direcciones,
-        });
-      }
-
-      if (!entidad.status) {
-        return res.status(409).send(entidad);
-      }
-
-      const { idEntidad: newIdEntidad } = entidad;
-
-      data = await Usuario.create({
-        usuario,
-        password,
-        idEntidad: newIdEntidad,
-        idTipoUsuario,
-      });
-
-      return res.status(201).send({ data });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }

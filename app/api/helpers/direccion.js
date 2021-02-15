@@ -1,7 +1,7 @@
 const { Direccion } = require('../../db/models/relaciones');
 // [{"idPais": "12wdfe", "idRegion":"121qwqwqw121", "idCiudad": "12wdfe", "idMunicipio":"121qwqwqw121", "idSector": "12wdfe", "idCalle":"121qwqwqw121", "idCasa":"121qwqwqw121"}]
 module.exports = {
-  async createDireccion(direcciones) {
+  async createDireccion({ direcciones, transaction }) {
     let notError = true;
     const arrayDireccion = [];
 
@@ -18,15 +18,18 @@ module.exports = {
             idCasa,
           } = direccion;
 
-          const newDireccion = await Direccion.create({
-            idPais,
-            idRegion,
-            idCiudad,
-            idMunicipio,
-            idSector,
-            idCalle,
-            idCasa,
-          });
+          const newDireccion = await Direccion.create(
+            {
+              idPais,
+              idRegion,
+              idCiudad,
+              idMunicipio,
+              idSector,
+              idCalle,
+              idCasa,
+            },
+            { transaction }
+          );
 
           if (newDireccion) {
             const { idDireccion } = newDireccion;

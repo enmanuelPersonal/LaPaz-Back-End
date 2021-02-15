@@ -12,12 +12,16 @@ module.exports = {
     telefonos = [],
     correos = [],
     direcciones = [],
+    transaction,
   }) {
     try {
-      const newEntidad = await Entidad.create({
-        nombre,
-        nacimiento,
-      });
+      const newEntidad = await Entidad.create(
+        {
+          nombre,
+          nacimiento,
+        },
+        { transaction }
+      );
 
       if (!newEntidad) {
         return {
@@ -29,7 +33,11 @@ module.exports = {
       const { idEntidad } = newEntidad;
 
       if (telefonos.length) {
-        const telefono = await createTelefono(idEntidad, telefonos);
+        const telefono = await createTelefono({
+          idEntidad,
+          telefonos,
+          transaction,
+        });
 
         if (!telefono) {
           return {
@@ -40,7 +48,7 @@ module.exports = {
       }
 
       if (correos.length) {
-        const correo = await createCorreo(idEntidad, correos);
+        const correo = await createCorreo({ idEntidad, correos, transaction });
 
         if (!correo) {
           return {
@@ -51,7 +59,10 @@ module.exports = {
       }
 
       if (direcciones.length) {
-        const direccionesIds = await createDireccion(direcciones);
+        const direccionesIds = await createDireccion({
+          direcciones,
+          transaction,
+        });
 
         if (!direccionesIds) {
           return {
@@ -64,8 +75,8 @@ module.exports = {
       }
 
       return {
-        status: true,
-        message: 'Entidad creada correctamente',
+        status: newEntidad.status,
+        idEntidad: newEntidad.idEntidad,
       };
     } catch (error) {
       return {

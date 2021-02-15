@@ -1,16 +1,19 @@
 const { Correo } = require('../../db/models/relaciones');
 // ['e@gmail.com','e1@gmail.com']
 module.exports = {
-  async createCorreo(idEntidad, emails) {
+  async createCorreo({ idEntidad, correos, transaction }) {
     let notError = true;
 
     try {
       await Promise.all(
-        await emails.map(async (email) => {
-          const newEmail = await Correo.create({
-            idEntidad,
-            correo: email,
-          });
+        await correos.map(async (email) => {
+          const newEmail = await Correo.create(
+            {
+              idEntidad,
+              correo: email,
+            },
+            { transaction }
+          );
 
           if (!newEmail) {
             notError = false;
@@ -20,7 +23,6 @@ module.exports = {
 
       return notError;
     } catch (error) {
-      console.log(error);
       return false;
     }
   },
