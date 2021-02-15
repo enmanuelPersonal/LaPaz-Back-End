@@ -14,4 +14,6 @@ app.use(cors({ origin: ORIGIN_URL, credentials: true }));
 app.use(helmet());
 app.use(routes);
 
+// require('./db/seeders/index');
+
 module.exports = app;

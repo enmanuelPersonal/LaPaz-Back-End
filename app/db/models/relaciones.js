@@ -12,7 +12,9 @@ const Pais = require('./Pais'),
   TipoTelefono = require('./TipoTelefono'),
   TipoUsuario = require('./TipoUsuario'),
   Direccion = require('./Direccion'),
-  Usuario = require('./Usuario');
+  Usuario = require('./Usuario'),
+  Persona = require('./Persona'),
+  Sexo = require('./Sexo');
 
 // Calle
 Calle.hasMany(Casa, {
@@ -59,13 +61,24 @@ Usuario.belongsTo(Entidad, {
 });
 
 Entidad.belongsToMany(Direccion, {
-  as: 'ASDireccionVSEntidad',
+  as: 'EntidadDireccion',
   through: 'DireccionVSEntidad',
 });
 
 Direccion.belongsToMany(Entidad, {
-  as: 'ASDireccionVSEntidad',
+  as: 'DireccionEntidad',
   through: 'DireccionVSEntidad',
+});
+
+// Persona
+Persona.belongsTo(Entidad, {
+  as: 'EntidadPersona',
+  foreignKey: 'idEntidad',
+});
+
+Persona.belongsTo(Sexo, {
+  as: 'SexoPersona',
+  foreignKey: 'idSexo',
 });
 
 // Municipio
@@ -120,12 +133,12 @@ Telefono.belongsTo(TipoTelefono, {
 
 //TipoUsuario
 TipoUsuario.belongsToMany(Permisos, {
-  as: 'ASTipoUsuarioVSPermisos',
+  as: 'TipoUsuarioPermisos',
   through: 'TipoUsuarioVSPermisos',
 });
 
 Permisos.belongsToMany(TipoUsuario, {
-  as: 'ASTipoUsuarioVSPermisos',
+  as: 'PermisosTipoUsuario',
   through: 'TipoUsuarioVSPermisos',
 });
 
@@ -150,4 +163,6 @@ module.exports = {
   TipoUsuario,
   Usuario,
   Direccion,
+  Persona,
+  Sexo
 };

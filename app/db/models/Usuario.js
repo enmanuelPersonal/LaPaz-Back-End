@@ -17,12 +17,6 @@ const Usuario = sequelize.define(
     usuario: {
       allowNull: false,
       type: DataTypes.TEXT,
-      validate: {
-        is: {
-          args: /\d{11}/g,
-          msg: 'cedula invalida',
-        },
-      },
     },
     password: {
       allowNull: false,
