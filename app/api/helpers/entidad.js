@@ -1,6 +1,6 @@
 const { Entidad } = require('../../db/models/relaciones');
 const { createCorreo } = require('./correo');
-const { createDireccion } = require('./direccion');
+const { createDireccion } = require('./direccion/direccion');
 const { createTelefono } = require('./telefono');
 // Telefono *
 // Correo *
@@ -49,7 +49,6 @@ module.exports = {
 
       if (correos.length) {
         const correo = await createCorreo({ idEntidad, correos, transaction });
-
         if (!correo) {
           return {
             status: false,
@@ -59,9 +58,9 @@ module.exports = {
       }
 
       if (direcciones.length) {
+        console.log('ENtro en direccion');
         const direccionesIds = await createDireccion({
           direcciones,
-          transaction,
         });
 
         if (!direccionesIds) {
@@ -70,8 +69,9 @@ module.exports = {
             message: 'Direcciones incorrectas',
           };
         }
-
+        console.log(direccionesIds, newEntidad);
         await newEntidad.setEntidadDireccion(direccionesIds);
+        console.log('Despues del vs');
       }
 
       return {
