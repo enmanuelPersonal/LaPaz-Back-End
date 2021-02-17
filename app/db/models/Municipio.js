@@ -17,9 +17,6 @@ const Municipio = sequelize.define(
     descripcion: {
       allowNull: false,
       type: DataTypes.TEXT,
-      unique: {
-        msg: 'Ya ese Municipio existe',
-      },
     },
   },
   {}

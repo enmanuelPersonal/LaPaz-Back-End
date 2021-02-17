@@ -24,7 +24,8 @@ module.exports = {
       correos = [],
       direcciones = [],
     } = req.body;
-    let data, getIdTipoUsuario;
+    let data = {},
+      getIdTipoUsuario;
 
     try {
       await sequelize.transaction(async (transaction) => {
@@ -56,7 +57,7 @@ module.exports = {
             { transaction }
           );
         } else {
-          const { status, idEntidad } = await createEntidad({
+          const { status, idEntidad, message } = await createEntidad({
             nombre,
             nacimiento,
             telefonos,
@@ -66,7 +67,7 @@ module.exports = {
           });
 
           if (!status) {
-            return res.status(409).send(idEntidad);
+            return res.status(409).send(message);
           }
 
           data = await Usuario.create(

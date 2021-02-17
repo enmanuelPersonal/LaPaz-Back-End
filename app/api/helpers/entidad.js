@@ -15,13 +15,10 @@ module.exports = {
     transaction,
   }) {
     try {
-      const newEntidad = await Entidad.create(
-        {
-          nombre,
-          nacimiento,
-        },
-        { transaction }
-      );
+      const newEntidad = await Entidad.create({
+        nombre,
+        nacimiento,
+      });
 
       if (!newEntidad) {
         return {
@@ -58,7 +55,6 @@ module.exports = {
       }
 
       if (direcciones.length) {
-        console.log('ENtro en direccion');
         const direccionesIds = await createDireccion({
           direcciones,
         });
@@ -69,9 +65,7 @@ module.exports = {
             message: 'Direcciones incorrectas',
           };
         }
-        console.log(direccionesIds, newEntidad);
         await newEntidad.setEntidadDireccion(direccionesIds);
-        console.log('Despues del vs');
       }
 
       return {

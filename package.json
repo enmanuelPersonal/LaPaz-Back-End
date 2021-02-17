@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node app/index.js",
     "dev": "nodemon app/index.js",
+    "seeders": "node app/db/seeders/index.js",
     "migrate": "npx sequelize-cli db:migrate",
     "seed": "npx sequelize-cli db:seed:all"
   },

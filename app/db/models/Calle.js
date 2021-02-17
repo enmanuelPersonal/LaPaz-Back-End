@@ -17,7 +17,6 @@ const Calle = sequelize.define(
     descripcion: {
       allowNull: false,
       type: DataTypes.TEXT,
-      unique: true,
     },
   },
   {}

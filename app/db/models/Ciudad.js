@@ -17,9 +17,6 @@ const Ciudad = sequelize.define(
     descripcion: {
       allowNull: false,
       type: DataTypes.TEXT,
-      unique: {
-        msg: 'Ya ese Ciudad existe',
-      },
     },
   },
   {}

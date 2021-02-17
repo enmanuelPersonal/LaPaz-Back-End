@@ -17,9 +17,6 @@ const Casa = sequelize.define(
     numero: {
       allowNull: false,
       type: DataTypes.INTEGER,
-      unique: {
-        msg: 'Ya ese numero de Casa existe',
-      },
     },
     referencia: {
       allowNull: true,
