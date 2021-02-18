@@ -27,4 +27,13 @@ module.exports = {
       return res.status(500).send({ message: error.message });
     }
   },
+  async getAllTypeUser(req, res) {
+    try {
+      const data = await TipoUsuario.findAll();
+
+      return res.status(201).send({ data });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
 };

@@ -27,11 +27,6 @@ const DB_URL = Object.assign(
 
 module.exports = {
   development: DB_URL,
-  test: DB_URL,
-  production: Object.assign({}, BASE_CONFIG, {
-    dialectOptions: {
-      ssl: { require: true },
-    },
-    ssl: true,
-  }),
+  staging: DB_URL,
+  production: DB_URL,
 };
