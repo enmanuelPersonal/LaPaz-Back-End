@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config();
 
 const {
   DB_NAME: database,
@@ -9,13 +9,14 @@ const {
 
 const BASE_CONFIG = {
   host: DB_HOST,
-  dialect: "mysql",
+  dialect: 'mysql',
   logging: false,
   pool: {
     max: 5,
     min: 0,
     idle: 10000,
   },
+  define: { freezeTableName: true },
 };
 
 const DB_URL = Object.assign(
@@ -26,11 +27,6 @@ const DB_URL = Object.assign(
 
 module.exports = {
   development: DB_URL,
-  test: DB_URL,
-  production: Object.assign({}, BASE_CONFIG, {
-    dialectOptions: {
-      ssl: { require: true },
-    },
-    ssl: true,
-  }),
+  staging: DB_URL,
+  production: DB_URL,
 };
