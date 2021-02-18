@@ -2,9 +2,7 @@ const { Entidad } = require('../../db/models/relaciones');
 const { createCorreo } = require('./correo');
 const { createDireccion } = require('./direccion/direccion');
 const { createTelefono } = require('./telefono');
-// Telefono *
-// Correo *
-// Direccion * devuelve el arreglo de las direcciones
+
 module.exports = {
   async createEntidad({
     nombre,

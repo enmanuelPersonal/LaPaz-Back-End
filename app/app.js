@@ -1,10 +1,10 @@
 const express = require('express');
-require("dotenv").config();
+require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const routes = require('./api/routes');
-const {COOKIE_SECRET, ORIGIN_URL}= process.env;
+const { COOKIE_SECRET, ORIGIN_URL } = process.env;
 
 const app = express();
 

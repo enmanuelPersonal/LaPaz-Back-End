@@ -61,7 +61,6 @@ module.exports = {
 
       const isCorrectPassword = await bcrypt.compare(password, hashedPwd);
 
-      // tipoUsuario, idEntidad, nombre, permisos
       if (isCorrectPassword) {
         const { cookie, cookieConfig } = cookieCreator({
           tipoUsuario: tipo,
