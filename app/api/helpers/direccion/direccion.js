@@ -6,7 +6,7 @@ const { findOrCreateMunicipio } = require('./findOrCreateMunicipio');
 const { findOrCreatePais } = require('./findOrCreatePais');
 const { findOrCreateRegion } = require('./findOrCreateRegion');
 const { findOrCreateSector } = require('./findOrCreateSector');
-// [{"pais": "12wdfe", "region":"121qwqwqw121", "ciudad": "12wdfe", "municipio":"121qwqwqw121", "sector": "12wdfe", "calle":"121qwqwqw121", "casa":"121qwqwqw121", "referencia": "frente a la banca"}]
+// [{"pais": "Republica Dominicana", "region":"Norte", "ciudad": "Santiago", "municipio":"Punal", "sector": "Laguna Prieta", "calle":"Los estrellas", "casa":"16", "referencia": "frente a la banca"}]
 module.exports = {
   async createDireccion({ direcciones }) {
     let notError = true;
