@@ -46,7 +46,7 @@ module.exports = {
 
       if (!getUser) {
         return res.status(404).send({
-          message: 'No person found with the given id number',
+          message: 'Usuario invalido',
         });
       }
 
@@ -79,7 +79,7 @@ module.exports = {
 
       return res
         .status(401)
-        .send({ login: false, message: 'Invalid Credentials' });
+        .send({ login: false, message: 'Credenciales invalidas' });
     } catch (error) {
       return res.status(500).send({ login: false, message: error.message });
     }
