@@ -3,24 +3,24 @@
 const { sequelize } = require('../config/database');
 const { DataTypes } = require('sequelize');
 
-const Sexo = sequelize.define(
-  'Sexo',
+const Factura = sequelize.define(
+  'Factura',
   {
-    idSexo: {
+    numFactura: {
       allowNull: false,
       autoIncrement: false,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: DataTypes.INTEGER,
       primaryKey: true,
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       unique: true,
     },
-    sexo: {
+    status: {
       allowNull: false,
-      type: DataTypes.TEXT,
-      unique: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
   },
   {}
 );
 
-module.exports = Sexo;
+module.exports = Factura;

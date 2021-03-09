@@ -14,7 +14,35 @@ const Pais = require('./Pais'),
   Direccion = require('./Direccion'),
   Usuario = require('./Usuario'),
   Persona = require('./Persona'),
-  Sexo = require('./Sexo');
+  Sexo = require('./Sexo'),
+  Identidad = require('./Identidad'),
+  TipoIdentidad = require('./TipoIdentidad'),
+  Empleado = require('./Empleado'),
+  Cargo = require('./Cargo'),
+  Cliente = require('./Cliente'),
+  Pariente = require('./Pariente'),
+  Difunto = require('./Difunto'),
+  TipoPlan = require('./TipoPlan'),
+  Suscripcion = require('./Suscripcion'),
+  Mensualidad = require('./Mensualidad'),
+  Producto = require('./Producto'),
+  ImagenProducto = require('./ImagenProducto'),
+  ProductoLog = require('./ProductoLog'),
+  TipoProducto = require('./TipoProducto'),
+  Categoria = require('./Categoria'),
+  Almacen = require('./Almacen'),
+  Factura = require('./Factura'),
+  DetalleFactura = require('./DetalleFactura'),
+  Itebis = require('./Itebis'),
+  TipoPago = require('./TipoPago'),
+  Transporte = require('./Transporte'),
+  Vehiculo = require('./Vehiculo'),
+  Marca = require('./Marca'),
+  Modelo = require('./Modelo'),
+  Suplidor = require('./Suplidor'),
+  ArmarPlan = require('./ArmarPlan'),
+  UnidadMedida = require('./UnidadMedida'),
+  HistorialSuscripcion = require('./HistorialSuscripcion');
 
 // Calle
 Calle.hasMany(Casa, {
@@ -147,6 +175,240 @@ Usuario.belongsTo(TipoUsuario, {
   foreignKey: 'idTipoUsuario',
 });
 
+/////////////////////////////P2////////////////////////////
+
+//Empleado
+Empleado.belongsToMany(Cargo, {
+  as: 'EmpleadoCargo',
+  through: 'EmpleadoVSCargo',
+});
+
+Cargo.belongsToMany(Empleado, {
+  as: 'CargoEmpleado',
+  through: 'EmpleadoVSCargo',
+});
+
+Empleado.belongsTo(Persona, {
+  as: 'EmpleadoPersona',
+  foreignKey: 'idPersona',
+});
+
+Empleado.belongsTo(Identidad, {
+  as: 'EmpleadoIdentidad',
+  foreignKey: 'idIdentidad',
+});
+
+Empleado.hasMany(HistorialSuscripcion, {
+  as: 'EmpleadoHistorialSuscripcion',
+  foreignKey: 'idEmpleado',
+});
+
+//Pariente
+Pariente.belongsToMany(Identidad, {
+  as: 'ParienteIdentidad',
+  through: 'ParienteVSIdentidad',
+});
+
+Identidad.belongsToMany(Pariente, {
+  as: 'IdentidadPariente',
+  through: 'ParienteVSIdentidad',
+});
+
+Pariente.belongsTo(Persona, {
+  as: 'ParientePersona',
+  foreignKey: 'idPersona',
+});
+
+Pariente.belongsTo(Cliente, {
+  as: 'ParienteCliente',
+  foreignKey: 'idCliente',
+});
+
+//Cliente
+Cliente.belongsTo(Persona, {
+  as: 'ClientePersona',
+  foreignKey: 'idPersona',
+});
+
+Cliente.belongsTo(Identidad, {
+  as: 'ClienteIdentidad',
+  foreignKey: 'idIdentidad',
+});
+
+Cliente.hasMany(HistorialSuscripcion, {
+  as: 'ClienteHistorialSuscripcion',
+  foreignKey: 'idCliente',
+});
+
+//Suplidor
+Suplidor.belongsTo(Persona, {
+  as: 'SuplidorPersona',
+  foreignKey: 'idPersona',
+});
+
+Suplidor.belongsTo(Identidad, {
+  as: 'SuplidorIdentidad',
+  foreignKey: 'idIdentidad',
+});
+
+//Difunto
+Difunto.belongsTo(Persona, {
+  as: 'DifuntoPersona',
+  foreignKey: 'idPersona',
+});
+
+Difunto.belongsTo(Cliente, {
+  as: 'DifuntoCliente',
+  foreignKey: 'idCliente',
+});
+
+//TipoPlan
+TipoPlan.hasMany(HistorialSuscripcion, {
+  as: 'PlanHistorialSuscripcion',
+  foreignKey: 'idTipoPlan',
+});
+
+//Suscripcion
+Suscripcion.belongsTo(Cliente, {
+  as: 'SuscripcionCliente',
+  foreignKey: 'idCliente',
+});
+
+Suscripcion.belongsTo(TipoPlan, {
+  as: 'SuscripcionTipoPlan',
+  foreignKey: 'idTipoPlan',
+});
+
+Suscripcion.hasMany(HistorialSuscripcion, {
+  as: 'SuscripcionHistorialSuscripcion',
+  foreignKey: 'idSuscripcion',
+});
+
+//Mensualidad
+Mensualidad.belongsTo(Suscripcion, {
+  as: 'MensualidadSuscripcion',
+  foreignKey: 'idSuscripcion',
+});
+
+//ArmarPlan
+ArmarPlan.belongsTo(UnidadMedida, {
+  as: 'ArmarUnidadMedida',
+  foreignKey: 'idUnidadMedida',
+});
+
+ArmarPlan.belongsTo(TipoPlan, {
+  as: 'ArmarTipoPlan',
+  foreignKey: 'idTipoPlan',
+});
+
+ArmarPlan.belongsTo(Producto, {
+  as: 'ArmarProducto',
+  foreignKey: 'idProducto',
+});
+
+//Producto
+Producto.belongsToMany(Almacen, {
+  as: 'ProductoAmacen',
+  through: 'ProductoVSAlmacen',
+});
+
+Almacen.belongsToMany(Producto, {
+  as: 'AlmacenProducto',
+  through: 'ProductoVSAlmacen',
+});
+
+Producto.belongsToMany(Suplidor, {
+  as: 'ProductoSuplidor',
+  through: 'ProductoVSSuplidor',
+});
+
+Suplidor.belongsToMany(Producto, {
+  as: 'SuplidorProducto',
+  through: 'ProductoVSSuplidor',
+});
+
+Producto.belongsTo(TipoProducto, {
+  as: 'ProductoTipo',
+  foreignKey: 'idTipoProducto',
+});
+
+Producto.belongsTo(Categoria, {
+  as: 'ProductoCategoria',
+  foreignKey: 'idCategoria',
+});
+
+//ImagenProducto
+ImagenProducto.belongsTo(Producto, {
+  as: 'ImagenProducto',
+  foreignKey: 'idProducto',
+});
+
+//ProductoLog
+ProductoLog.belongsTo(Producto, {
+  as: 'ProductoLog',
+  foreignKey: 'idProducto',
+});
+
+//Identidad
+Identidad.belongsTo(TipoIdentidad, {
+  as: 'TipoIdentidad',
+  foreignKey: 'idTipoIdentidad',
+});
+
+//Factura
+Factura.belongsTo(Cliente, {
+  as: 'FacturaCliente',
+  foreignKey: 'idCliente',
+});
+
+Factura.belongsTo(TipoPago, {
+  as: 'FacturaTipoPago',
+  foreignKey: 'idTipoPago',
+});
+
+Factura.belongsTo(Itebis, {
+  as: 'FacturaItebis',
+  foreignKey: 'idItebis',
+});
+
+//DetalleFactura
+DetalleFactura.belongsTo(Factura, {
+  as: 'DetalleFactura',
+  foreignKey: 'numFactura',
+});
+
+DetalleFactura.belongsTo(Producto, {
+  as: 'DetalleFacturaProducto',
+  foreignKey: 'idProducto',
+});
+
+//Transporte
+Transporte.belongsTo(Factura, {
+  as: 'TransporteFactura',
+  foreignKey: 'numFactura',
+});
+
+Transporte.belongsTo(Vehiculo, {
+  as: 'TransporteVehiculo',
+  foreignKey: 'idVehiculo',
+});
+
+Transporte.belongsTo(Direccion, {
+  as: 'TransporteDireccion',
+  foreignKey: 'idDireccion',
+});
+
+//Vehiculo
+Vehiculo.belongsTo(Marca, {
+  as: 'VehiculoMarca',
+  foreignKey: 'idMarca',
+});
+
+Vehiculo.belongsTo(Modelo, {
+  as: 'VehiculoModelo',
+  foreignKey: 'idModelo',
+});
+
 module.exports = {
   Pais,
   Region,
@@ -164,5 +426,33 @@ module.exports = {
   Usuario,
   Direccion,
   Persona,
-  Sexo
+  Sexo,
+  Identidad,
+  TipoIdentidad,
+  Empleado,
+  Cargo,
+  Cliente,
+  Pariente,
+  Difunto,
+  TipoPlan,
+  Suscripcion,
+  Mensualidad,
+  Producto,
+  ImagenProducto,
+  ProductoLog,
+  TipoProducto,
+  Categoria,
+  Almacen,
+  Factura,
+  DetalleFactura,
+  Itebis,
+  TipoPago,
+  Transporte,
+  Vehiculo,
+  Marca,
+  Modelo,
+  Suplidor,
+  ArmarPlan,
+  UnidadMedida,
+  HistorialSuscripcion,
 };

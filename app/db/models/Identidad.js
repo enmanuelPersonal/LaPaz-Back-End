@@ -3,10 +3,10 @@
 const { sequelize } = require('../config/database');
 const { DataTypes } = require('sequelize');
 
-const Sexo = sequelize.define(
-  'Sexo',
+const Identidad = sequelize.define(
+  'Identidad',
   {
-    idSexo: {
+    idIdentidad: {
       allowNull: false,
       autoIncrement: false,
       defaultValue: DataTypes.UUIDV4,
@@ -14,7 +14,7 @@ const Sexo = sequelize.define(
       type: DataTypes.UUID,
       unique: true,
     },
-    sexo: {
+    serie: {
       allowNull: false,
       type: DataTypes.TEXT,
       unique: true,
@@ -23,4 +23,4 @@ const Sexo = sequelize.define(
   {}
 );
 
-module.exports = Sexo;
+module.exports = Identidad;
