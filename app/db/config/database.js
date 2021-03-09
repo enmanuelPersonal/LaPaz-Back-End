@@ -22,6 +22,16 @@ const sequelize = new Sequelize(
   }
 })();
 
+// sequelize
+//   .sync({
+//     logging: console.log,
+//     force: true,
+//   })
+//   .then(() => console.log("conectado"))
+//   .catch((error) => {
+//     console.error("No se pudo conectar:", error);
+//   });
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
