@@ -1,5 +1,5 @@
 const { Persona, Sexo } = require('../../db/models/relaciones');
-const { createEntidad } = require('./entidad');
+const { createEntidad, updateEntidad } = require('./entidad');
 
 module.exports = {
   async createPersona({
@@ -49,19 +49,85 @@ module.exports = {
       if (!newPerson) {
         return {
           status: false,
-          message: 'Esa entidad ya existe',
+          message: 'Esa persona ya existe',
         };
       }
 
       return {
         status: true,
         idPersona: newPerson.idPersona,
-        idEntidad
+        idEntidad,
       };
     } catch (error) {
       return {
         status: false,
         message: 'No se pudo crear la Persona',
+      };
+    }
+  },
+
+  async updatePersona({
+    nombre,
+    nacimiento,
+    telefonos,
+    correos,
+    direcciones,
+    apellido,
+    sexo,
+    idEntidad,
+    idPersona,
+  }) {
+    try {
+      const { status, message } = await updateEntidad({
+        nombre,
+        nacimiento,
+        telefonos,
+        correos,
+        direcciones,
+        idEntidad,
+      });
+
+      if (!status) {
+        return {
+          status: false,
+          message,
+        };
+      }
+
+      const getSexo = await Sexo.findOne({
+        where: { sexo },
+      });
+
+      if (!getSexo) {
+        return {
+          status: false,
+          message: 'Este sexo no existe',
+        };
+      }
+
+      const updatePerson = await Persona.update(
+        {
+          apellido,
+          idSexo: getSexo.idSexo,
+          idEntidad,
+        },
+        { where: { idPersona } }
+      );
+
+      if (!updatePerson) {
+        return {
+          status: false,
+          message: 'Esa persona no existe',
+        };
+      }
+
+      return {
+        status: true,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        message: 'No se pudo actualizar la Persona',
       };
     }
   },

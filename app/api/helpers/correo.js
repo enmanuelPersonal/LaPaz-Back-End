@@ -26,4 +26,32 @@ module.exports = {
       return false;
     }
   },
+  // [{idCorreo:"1234rtygherd", correo:'e@gmail.com'},{idCorreo:"1234rtygherd", correo:'e1@gmail.com'}]
+  async updateCorreo({ idEntidad, correos }) {
+    let notError = true;
+
+    try {
+      await Promise.all(
+        await correos.map(async (email) => {
+          const { idCorreo, correo } = email;
+
+          const newEmail = await Correo.update(
+            {
+              idEntidad,
+              correo,
+            },
+            { where: { idCorreo } }
+          );
+
+          if (!newEmail) {
+            notError = false;
+          }
+        })
+      );
+
+      return notError;
+    } catch (error) {
+      return false;
+    }
+  },
 };
