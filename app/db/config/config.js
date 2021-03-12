@@ -1,15 +1,21 @@
 require('dotenv').config();
 
 const {
-  DB_NAME: database,
-  DB_USER: username,
-  DB_PASSWORD: password,
+  PG_URI,
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD,
   DB_HOST,
+  PG_PORT = 5432,
 } = process.env;
 
+const PG_URL =
+  PG_URI ||
+  `postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${PG_PORT}/${DB_NAME}`;
+
 const BASE_CONFIG = {
-  host: DB_HOST,
-  dialect: 'mysql',
+  dialect: 'postgres',
+  url: PG_URL,
   logging: false,
   pool: {
     max: 5,
@@ -19,14 +25,13 @@ const BASE_CONFIG = {
   define: { freezeTableName: true },
 };
 
-const DB_URL = Object.assign(
-  {},
-  { database, username, password },
-  { BASE_CONFIG }
-);
-
 module.exports = {
-  development: DB_URL,
-  staging: DB_URL,
-  production: DB_URL,
+  development: BASE_CONFIG,
+  staging: BASE_CONFIG,
+  production: Object.assign({}, BASE_CONFIG, {
+    dialectOptions: {
+      ssl: { require: true },
+    },
+    ssl: true,
+  }),
 };
