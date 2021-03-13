@@ -121,6 +121,7 @@ module.exports = {
               {
                 model: Entidad,
                 as: 'EntidadPersona',
+                where: { status: true },
               },
               {
                 model: Sexo,
@@ -159,7 +160,7 @@ module.exports = {
             as: 'EmpleadoPersona',
 
             include: [
-              { model: Entidad, as: 'EntidadPersona' },
+              { model: Entidad, as: 'EntidadPersona', where: { status: true } },
               { model: Sexo, as: 'SexoPersona' },
             ],
           },

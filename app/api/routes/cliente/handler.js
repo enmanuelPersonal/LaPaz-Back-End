@@ -105,7 +105,7 @@ module.exports = {
             as: 'ClientePersona',
 
             include: [
-              { model: Entidad, as: 'EntidadPersona' },
+              { model: Entidad, as: 'EntidadPersona', where: { status: true } },
               { model: Sexo, as: 'SexoPersona' },
             ],
           },
@@ -136,7 +136,7 @@ module.exports = {
             as: 'ClientePersona',
 
             include: [
-              { model: Entidad, as: 'EntidadPersona' },
+              { model: Entidad, as: 'EntidadPersona', where: { status: true } },
               { model: Sexo, as: 'SexoPersona' },
             ],
           },
