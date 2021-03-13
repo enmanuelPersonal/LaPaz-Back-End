@@ -89,6 +89,33 @@ const personParienteParams = {
   ],
 };
 
+const personDeceasedParams = {
+  model: Persona,
+  as: 'DifuntoPersona',
+  where: { status: false },
+  include: [
+    {
+      model: Entidad,
+      as: 'EntidadPersona',
+      where: { status: true },
+      include: [
+        {
+          model: Correo,
+          as: 'EntidadCorreo',
+          attributes: ['idCorreo', 'correo'],
+        },
+        {
+          model: Telefono,
+          as: 'EntidadTelefono',
+          attributes: ['idTelefono', 'telefono', 'idTipoTelefono'],
+        },
+        { model: Direccion, as: 'EntidadDireccion' },
+      ],
+    },
+    { model: Sexo, as: 'SexoPersona' },
+  ],
+};
+
 const clientParienteParams = {
   model: Cliente,
   as: 'ParienteCliente',
@@ -111,9 +138,33 @@ const clientParienteParams = {
   ],
 };
 
+const clientDeceasedParams = {
+  model: Cliente,
+  as: 'DifuntoCliente',
+  attributes: ['idCliente'],
+  include: [
+    {
+      model: Persona,
+      as: 'ClientePersona',
+      attributes: ['apellido', 'status'],
+      include: [
+        {
+          model: Entidad,
+          as: 'EntidadPersona',
+          attributes: ['nombre', 'status'],
+          where: { status: true },
+        },
+        { model: Sexo, as: 'SexoPersona', attributes: ['sexo'] },
+      ],
+    },
+  ],
+};
+
 module.exports = {
   personParienteParams,
   clientParienteParams,
   personClientParams,
   personEmployeParams,
+  personDeceasedParams,
+  clientDeceasedParams,
 };
