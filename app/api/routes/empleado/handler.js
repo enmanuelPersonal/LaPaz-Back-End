@@ -10,6 +10,7 @@ const {
 const { getCargo } = require('../../helpers/cargos');
 const { createIdentidad, updateIdentidad } = require('../../helpers/identidad');
 const { createPersona, updatePersona } = require('../../helpers/persona');
+const { personEmployeParams } = require('../../utils/constant');
 // {
 //   "nombre" : "Jose Enmanuel",
 //   "apellido" : "Estrella Estrella",
@@ -81,7 +82,7 @@ module.exports = {
 
           if (EmployeExist) {
             return res.status(409).send({
-              data: userExist,
+              data: EmployeExist,
               message: 'Este Empleado ya esta registrado.',
             });
           }
@@ -104,6 +105,7 @@ module.exports = {
     try {
       const employes = await Empleado.findAll({
         include: [
+          personEmployeParams,
           {
             model: Identidad,
             as: 'EmpleadoIdentidad',
@@ -112,22 +114,6 @@ module.exports = {
           {
             model: Cargo,
             as: 'EmpleadoCargo',
-          },
-          {
-            model: Persona,
-            as: 'EmpleadoPersona',
-
-            include: [
-              {
-                model: Entidad,
-                as: 'EntidadPersona',
-                where: { status: true },
-              },
-              {
-                model: Sexo,
-                as: 'SexoPersona',
-              },
-            ],
           },
         ],
       });
@@ -141,8 +127,9 @@ module.exports = {
     const { serie } = req.params;
 
     try {
-      const employe = await Empleado.findOne({
+      const employe = await Empleado.findAll({
         include: [
+          personEmployeParams,
           {
             model: Identidad,
             as: 'EmpleadoIdentidad',
@@ -154,15 +141,6 @@ module.exports = {
           {
             model: Cargo,
             as: 'EmpleadoCargo',
-          },
-          {
-            model: Persona,
-            as: 'EmpleadoPersona',
-
-            include: [
-              { model: Entidad, as: 'EntidadPersona', where: { status: true } },
-              { model: Sexo, as: 'SexoPersona' },
-            ],
           },
         ],
       });

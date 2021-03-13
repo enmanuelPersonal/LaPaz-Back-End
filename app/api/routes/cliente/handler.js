@@ -8,6 +8,7 @@ const {
 } = require('../../../db/models/relaciones');
 const { createIdentidad, updateIdentidad } = require('../../helpers/identidad');
 const { createPersona, updatePersona } = require('../../helpers/persona');
+const { personClientParams } = require('../../utils/constant');
 
 // {
 //   "nombre" : "Jose Enmanuel",
@@ -75,7 +76,7 @@ module.exports = {
 
           if (clientExist) {
             return res.status(409).send({
-              data: userExist,
+              data: clientExist,
               message: 'Este Cliente ya esta registrado.',
             });
           }
@@ -96,18 +97,10 @@ module.exports = {
     try {
       const clients = await Cliente.findAll({
         include: [
+          personClientParams,
           {
             model: Identidad,
             as: 'ClienteIdentidad',
-          },
-          {
-            model: Persona,
-            as: 'ClientePersona',
-
-            include: [
-              { model: Entidad, as: 'EntidadPersona', where: { status: true } },
-              { model: Sexo, as: 'SexoPersona' },
-            ],
           },
         ],
       });
@@ -121,24 +114,15 @@ module.exports = {
     const { serie } = req.params;
 
     try {
-      const client = await Cliente.findOne({
+      const client = await Cliente.findAll({
         include: [
+          personClientParams,
           {
             model: Identidad,
             as: 'ClienteIdentidad',
-            attributes: ['serie'],
             where: {
               serie,
             },
-          },
-          {
-            model: Persona,
-            as: 'ClientePersona',
-
-            include: [
-              { model: Entidad, as: 'EntidadPersona', where: { status: true } },
-              { model: Sexo, as: 'SexoPersona' },
-            ],
           },
         ],
       });
