@@ -10,12 +10,14 @@ module.exports = {
     telefonos = [],
     correos = [],
     direcciones = [],
+    statusEntidad = true,
     transaction,
   }) {
     try {
       const newEntidad = await Entidad.create({
         nombre,
         nacimiento,
+        status: statusEntidad,
       });
 
       if (!newEntidad) {
@@ -67,7 +69,7 @@ module.exports = {
       }
 
       return {
-        status: newEntidad.status,
+        status: true,
         idEntidad: newEntidad.idEntidad,
       };
     } catch (error) {

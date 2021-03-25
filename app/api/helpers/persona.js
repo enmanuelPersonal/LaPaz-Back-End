@@ -11,6 +11,7 @@ module.exports = {
     apellido,
     sexo,
     transaction,
+    statusEntidad = true,
   }) {
     try {
       const { status, idEntidad, message } = await createEntidad({
@@ -19,6 +20,7 @@ module.exports = {
         telefonos,
         correos,
         direcciones,
+        statusEntidad,
         transaction,
       });
 

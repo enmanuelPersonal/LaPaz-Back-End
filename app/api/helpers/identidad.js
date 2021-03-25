@@ -22,7 +22,7 @@ module.exports = {
     } catch (error) {
       return {
         status: false,
-        message: 'No se pudo crear la identidad',
+        message: 'No se pudo crear la identidad, ya existe.',
       };
     }
   },

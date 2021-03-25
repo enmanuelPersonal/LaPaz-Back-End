@@ -7,6 +7,9 @@ const employeRoute = require('./empleado/route');
 const clientRoute = require('./cliente/route');
 const parienteRoute = require('./pariente/route');
 const deceasedRoute = require('./difunto/route');
+const identityRoute = require('./identidad/route');
+const identityTypeRoute = require('./tipoIdentidad/route');
+const cargoRoute = require('./cargo/route');
 const imgRoute = require('./img/route');
 
 const router = Router();
@@ -18,6 +21,9 @@ router.use('/employe', employeRoute);
 router.use('/client', clientRoute);
 router.use('/pariente', parienteRoute);
 router.use('/deceased', deceasedRoute);
+router.use('/identity', identityRoute);
+router.use('/typeIdentity', identityTypeRoute);
+router.use('/cargo', cargoRoute);
 router.use('/img', imgRoute);
 
 module.exports = router;

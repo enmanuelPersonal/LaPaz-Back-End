@@ -2,10 +2,9 @@ const { sequelize } = require('../../../db/config/database');
 const {
   Identidad,
   Cliente,
-  Persona,
-  Entidad,
-  Sexo,
+  TipoIdentidad,
 } = require('../../../db/models/relaciones');
+const { getNameDireccion } = require('../../helpers/getNamesDireccion');
 const { createIdentidad, updateIdentidad } = require('../../helpers/identidad');
 const { createPersona, updatePersona } = require('../../helpers/persona');
 const { personClientParams } = require('../../utils/constant');
@@ -33,6 +32,7 @@ module.exports = {
       telefonos = [],
       correos = [],
       direcciones = [],
+      statusEntidad = false,
     } = req.body;
     let data = {};
 
@@ -64,6 +64,7 @@ module.exports = {
             direcciones,
             apellido,
             sexo,
+            statusEntidad,
             transaction,
           });
           if (!status) {
@@ -94,6 +95,7 @@ module.exports = {
     }
   },
   async getClients(req, res) {
+    let parseData = [];
     try {
       const clients = await Cliente.findAll({
         include: [
@@ -101,17 +103,81 @@ module.exports = {
           {
             model: Identidad,
             as: 'ClienteIdentidad',
+            attributes: ['serie'],
+            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
           },
         ],
+        order: [['updatedAt', 'DESC']],
       });
+      if (clients.length) {
+        await Promise.all(
+          await clients.map(async (client) => {
+            if (!client.ClientePersona) {
+              return;
+            }
 
-      return res.status(200).send({ data: clients });
+            const {
+              idCliente,
+              idPersona,
+              idIdentidad,
+              ClientePersona: {
+                apellido,
+                status: personStatus,
+                idEntidad,
+                EntidadPersona: {
+                  nombre,
+                  nacimiento,
+                  status: entidadStatus,
+                  EntidadCorreo,
+                  EntidadTelefono,
+                  EntidadDireccion,
+                },
+                SexoPersona: { sexo },
+              },
+              ClienteIdentidad: {
+                serie,
+                TipoIdentidad: { idTipoIdentidad },
+              },
+            } = client;
+
+            const telefonos = EntidadTelefono.map(
+              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+                idTelefono,
+                telefono,
+                tipo,
+              })
+            );
+            getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+
+            return parseData.push({
+              idCliente,
+              idPersona,
+              idIdentidad,
+              idEntidad,
+              nombre,
+              apellido,
+              nacimiento,
+              sexo,
+              personStatus,
+              entidadStatus,
+              identidades: { serie, idTipoIdentidad },
+              correos: EntidadCorreo,
+              telefonos,
+              direcciones: EntidadDireccion,
+              ...getNameDireccions,
+            });
+          })
+        );
+      }
+      return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
   },
   async getClientsByIdentidad(req, res) {
     const { serie } = req.params;
+    let parseData = [];
+    let getNameDireccions = {};
 
     try {
       const client = await Cliente.findAll({
@@ -120,6 +186,8 @@ module.exports = {
           {
             model: Identidad,
             as: 'ClienteIdentidad',
+            attributes: ['serie'],
+            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
             where: {
               serie,
             },
@@ -127,7 +195,65 @@ module.exports = {
         ],
       });
 
-      return res.status(200).send({ data: client });
+      if (client.length) {
+        parseData = client.map(
+          ({
+            idCliente,
+            idPersona,
+            idIdentidad,
+            ClientePersona: {
+              apellido,
+              status: personStatus,
+              idEntidad,
+              EntidadPersona: {
+                nombre,
+                nacimiento,
+                status: entidadStatus,
+                EntidadCorreo,
+                EntidadTelefono,
+                EntidadDireccion,
+              },
+              SexoPersona: { sexo },
+            },
+            ClienteIdentidad: {
+              serie,
+              TipoIdentidad: { idTipoIdentidad },
+            },
+          }) => {
+            const telefonos = EntidadTelefono.map(
+              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+                idTelefono,
+                telefono,
+                tipo,
+              })
+            );
+
+            return {
+              idCliente,
+              idPersona,
+              idIdentidad,
+              idEntidad,
+              nombre,
+              apellido,
+              nacimiento,
+              sexo,
+              personStatus,
+              entidadStatus,
+              identidades: { serie, idTipoIdentidad },
+              correos: EntidadCorreo,
+              telefonos,
+              direcciones: EntidadDireccion,
+            };
+          }
+        );
+      }
+
+      const { direcciones } = parseData[0];
+      getNameDireccions = await getNameDireccion(direcciones[0]);
+
+      return res
+        .status(200)
+        .send({ data: { ...parseData[0], ...getNameDireccions } });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -202,6 +328,30 @@ module.exports = {
           idIdentidad,
         },
         { where: { idCliente } }
+      );
+
+      return res.status(201).send({ data });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+  async deleteClient(req, res) {
+    const { idEntidad } = req.body;
+
+    try {
+      const getEmploye = await Entidad.findOne({
+        where: { idEntidad },
+      });
+
+      if (!getEmploye) {
+        return res.status(409).send({ message: 'Este Cliente no existe' });
+      }
+
+      const data = await Entidad.update(
+        {
+          status: false,
+        },
+        { where: { idEntidad } }
       );
 
       return res.status(201).send({ data });

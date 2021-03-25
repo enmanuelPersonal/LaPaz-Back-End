@@ -3,11 +3,11 @@ const {
   Empleado,
   Identidad,
   Cargo,
-  Persona,
+  TipoIdentidad,
   Entidad,
-  Sexo,
 } = require('../../../db/models/relaciones');
 const { getCargo } = require('../../helpers/cargos');
+const { getNameDireccion } = require('../../helpers/getNamesDireccion');
 const { createIdentidad, updateIdentidad } = require('../../helpers/identidad');
 const { createPersona, updatePersona } = require('../../helpers/persona');
 const { personEmployeParams } = require('../../utils/constant');
@@ -102,6 +102,8 @@ module.exports = {
     }
   },
   async getEmployes(req, res) {
+    let parseData = [],
+      getNameDireccions = {};
     try {
       const employes = await Empleado.findAll({
         include: [
@@ -110,21 +112,93 @@ module.exports = {
             model: Identidad,
             as: 'EmpleadoIdentidad',
             attributes: ['serie'],
+            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
           },
           {
             model: Cargo,
             as: 'EmpleadoCargo',
           },
         ],
+        order: [['updatedAt', 'DESC']],
       });
 
-      return res.status(200).send({ data: employes });
+      if (employes.length) {
+        await Promise.all(
+          await employes.map(async (employe) => {
+            if (!employe.EmpleadoPersona) {
+              return;
+            }
+
+            const {
+              idEmpleado,
+              idPersona,
+              idIdentidad,
+              EmpleadoPersona: {
+                apellido,
+                status: personStatus,
+                idEntidad,
+                EntidadPersona: {
+                  nombre,
+                  nacimiento,
+                  status: entidadStatus,
+                  EntidadCorreo,
+                  EntidadTelefono,
+                  EntidadDireccion,
+                },
+                SexoPersona: { sexo },
+              },
+              EmpleadoIdentidad: {
+                serie,
+                TipoIdentidad: { idTipoIdentidad },
+              },
+              EmpleadoCargo,
+            } = employe;
+
+            const cargos = EmpleadoCargo.map(({ cargo, salario }) => ({
+              cargo,
+              salario,
+            }));
+
+            const telefonos = EntidadTelefono.map(
+              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+                idTelefono,
+                telefono,
+                tipo,
+              })
+            );
+
+            getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+
+            return parseData.push({
+              idEmpleado,
+              idPersona,
+              idIdentidad,
+              idEntidad,
+              nombre,
+              apellido,
+              nacimiento,
+              sexo,
+              cargos,
+              personStatus,
+              entidadStatus,
+              identidades: { serie, idTipoIdentidad },
+              correos: EntidadCorreo,
+              telefonos,
+              direcciones: EntidadDireccion,
+              ...getNameDireccions,
+            });
+          })
+        );
+      }
+      return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
   },
   async getEmployeByIdentidad(req, res) {
     const { serie } = req.params;
+    let parseData = [];
+    let getNameDireccions = {};
 
     try {
       const employe = await Empleado.findAll({
@@ -134,6 +208,7 @@ module.exports = {
             model: Identidad,
             as: 'EmpleadoIdentidad',
             attributes: ['serie'],
+            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
             where: {
               serie,
             },
@@ -145,7 +220,72 @@ module.exports = {
         ],
       });
 
-      return res.status(200).send({ data: employe });
+      if (employe.length) {
+        parseData = employe.map(
+          ({
+            idEmpleado,
+            idPersona,
+            idIdentidad,
+            EmpleadoPersona: {
+              apellido,
+              status: personStatus,
+              idEntidad,
+              EntidadPersona: {
+                nombre,
+                nacimiento,
+                status: entidadStatus,
+                EntidadCorreo,
+                EntidadTelefono,
+                EntidadDireccion,
+              },
+              SexoPersona: { sexo },
+            },
+            EmpleadoIdentidad: {
+              serie,
+              TipoIdentidad: { idTipoIdentidad },
+            },
+            EmpleadoCargo,
+          }) => {
+            const cargos = EmpleadoCargo.map(({ cargo, salario }) => ({
+              cargo,
+              salario,
+            }));
+
+            const telefonos = EntidadTelefono.map(
+              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+                idTelefono,
+                telefono,
+                tipo,
+              })
+            );
+
+            return {
+              idEmpleado,
+              idPersona,
+              idIdentidad,
+              idEntidad,
+              nombre,
+              apellido,
+              nacimiento,
+              sexo,
+              cargos,
+              personStatus,
+              entidadStatus,
+              identidades: { serie, idTipoIdentidad },
+              correos: EntidadCorreo,
+              telefonos,
+              direcciones: EntidadDireccion,
+            };
+          }
+        );
+
+        const { direcciones } = parseData[0];
+        getNameDireccions = await getNameDireccion(direcciones[0]);
+      }
+
+      return res
+        .status(200)
+        .send({ data: { ...parseData[0], ...getNameDireccions } });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -229,6 +369,30 @@ module.exports = {
       );
 
       await getEmploye.setEmpleadoCargo(idCargos);
+
+      return res.status(201).send({ data });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+  async deleteEmploye(req, res) {
+    const { idEntidad } = req.body;
+
+    try {
+      const getEmploye = await Entidad.findOne({
+        where: { idEntidad },
+      });
+
+      if (!getEmploye) {
+        return res.status(409).send({ message: 'Este Empleado no existe' });
+      }
+
+      const data = await Entidad.update(
+        {
+          status: false,
+        },
+        { where: { idEntidad } }
+      );
 
       return res.status(201).send({ data });
     } catch (error) {

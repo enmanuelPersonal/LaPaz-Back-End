@@ -6,6 +6,7 @@ const {
   Direccion,
   Sexo,
   Cliente,
+  TipoTelefono,
 } = require('../../db/models/relaciones');
 
 const personEmployeParams = {
@@ -27,6 +28,7 @@ const personEmployeParams = {
           model: Telefono,
           as: 'EntidadTelefono',
           attributes: ['idTelefono', 'telefono', 'idTipoTelefono'],
+          include: [{ model: TipoTelefono, as: 'TipoTele' }],
         },
         { model: Direccion, as: 'EntidadDireccion' },
       ],
@@ -54,6 +56,7 @@ const personClientParams = {
           model: Telefono,
           as: 'EntidadTelefono',
           attributes: ['idTelefono', 'telefono', 'idTipoTelefono'],
+          include: [{ model: TipoTelefono, as: 'TipoTele' }],
         },
         { model: Direccion, as: 'EntidadDireccion' },
       ],
@@ -81,6 +84,7 @@ const personParienteParams = {
           model: Telefono,
           as: 'EntidadTelefono',
           attributes: ['idTelefono', 'telefono', 'idTipoTelefono'],
+          include: [{ model: TipoTelefono, as: 'TipoTele' }],
         },
         { model: Direccion, as: 'EntidadDireccion' },
       ],
@@ -108,6 +112,7 @@ const personDeceasedParams = {
           model: Telefono,
           as: 'EntidadTelefono',
           attributes: ['idTelefono', 'telefono', 'idTipoTelefono'],
+          include: [{ model: TipoTelefono, as: 'TipoTele' }],
         },
         { model: Direccion, as: 'EntidadDireccion' },
       ],
