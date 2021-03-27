@@ -3,10 +3,12 @@ const {
   Identidad,
   Cliente,
   TipoIdentidad,
+  Entidad,
 } = require('../../../db/models/relaciones');
+const { createCliente } = require('../../helpers/cliente');
 const { getNameDireccion } = require('../../helpers/getNamesDireccion');
-const { createIdentidad, updateIdentidad } = require('../../helpers/identidad');
-const { createPersona, updatePersona } = require('../../helpers/persona');
+const { updateIdentidad } = require('../../helpers/identidad');
+const { updatePersona } = require('../../helpers/persona');
 const { personClientParams } = require('../../utils/constant');
 
 // {
@@ -38,54 +40,22 @@ module.exports = {
 
     try {
       await sequelize.transaction(async (transaction) => {
-        const {
-          status: statusE,
-          idIdentidad,
-          message: messageE,
-        } = await createIdentidad({
+        const { data, error, message } = await createCliente({
+          apellido,
+          sexo,
           identidades,
+          idPersona: idPersonaCreate,
+          nombre,
+          nacimiento,
+          telefonos,
+          correos,
+          direcciones,
+          statusEntidad,
+          transaction,
         });
 
-        if (!statusE) {
-          return res.status(409).send(messageE);
-        }
-
-        if (idPersonaCreate) {
-          data = await Cliente.create({
-            idPersona: idPersonaCreate,
-            idIdentidad,
-          });
-        } else {
-          const { status, idPersona, message } = await createPersona({
-            nombre,
-            nacimiento,
-            telefonos,
-            correos,
-            direcciones,
-            apellido,
-            sexo,
-            statusEntidad,
-            transaction,
-          });
-          if (!status) {
-            return res.status(409).send(message);
-          }
-
-          const clientExist = await Cliente.findOne({
-            where: { idPersona },
-          });
-
-          if (clientExist) {
-            return res.status(409).send({
-              data: clientExist,
-              message: 'Este Cliente ya esta registrado.',
-            });
-          }
-
-          data = await Cliente.create({
-            idPersona,
-            idIdentidad,
-          });
+        if (error) {
+          return res.status(409).send(message);
         }
 
         return res.status(201).send({ data });
@@ -246,10 +216,10 @@ module.exports = {
             };
           }
         );
-      }
 
-      const { direcciones } = parseData[0];
-      getNameDireccions = await getNameDireccion(direcciones[0]);
+        const { direcciones } = parseData[0];
+        getNameDireccions = await getNameDireccion(direcciones[0]);
+      }
 
       return res
         .status(200)
@@ -339,11 +309,11 @@ module.exports = {
     const { idEntidad } = req.body;
 
     try {
-      const getEmploye = await Entidad.findOne({
+      const getClient = await Entidad.findOne({
         where: { idEntidad },
       });
 
-      if (!getEmploye) {
+      if (!getClient) {
         return res.status(409).send({ message: 'Este Cliente no existe' });
       }
 

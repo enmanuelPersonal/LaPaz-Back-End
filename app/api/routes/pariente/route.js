@@ -9,5 +9,6 @@ router.get('/:serie', handler.getParienteByIdentidad);
 router.get('/client/:idCliente', handler.getParienteByClient);
 router.post('/add', handler.addPariente);
 router.put('/', handler.updatePariente);
+router.delete('/', handler.deletePariente);
 
 module.exports = router;

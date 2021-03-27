@@ -33,6 +33,8 @@ const Pais = require('./Pais'),
   Almacen = require('./Almacen'),
   Factura = require('./Factura'),
   DetalleFactura = require('./DetalleFactura'),
+  Compra = require('./Compra'),
+  DetalleCompra = require('./DetalleCompra'),
   Itebis = require('./Itebis'),
   TipoPago = require('./TipoPago'),
   Transporte = require('./Transporte'),
@@ -42,6 +44,9 @@ const Pais = require('./Pais'),
   Suplidor = require('./Suplidor'),
   ArmarPlan = require('./ArmarPlan'),
   UnidadMedida = require('./UnidadMedida'),
+  SalidaServicios = require('./SalidaServicios'),
+  EntradaServicios = require('./EntradaServicios'),
+  HistorialTiempoServicios = require('./HistorialTiempoServicios'),
   HistorialSuscripcion = require('./HistorialSuscripcion');
 
 // Calle
@@ -290,6 +295,11 @@ Mensualidad.belongsTo(Suscripcion, {
   foreignKey: 'idSuscripcion',
 });
 
+Mensualidad.belongsTo(TipoPago, {
+  as: 'MensualidadTipoPago',
+  foreignKey: 'idTipoPago',
+});
+
 //ArmarPlan
 ArmarPlan.belongsTo(UnidadMedida, {
   as: 'ArmarUnidadMedida',
@@ -361,14 +371,50 @@ Factura.belongsTo(Cliente, {
   foreignKey: 'idCliente',
 });
 
-Factura.belongsTo(TipoPago, {
+Factura.belongsToMany(TipoPago, {
   as: 'FacturaTipoPago',
-  foreignKey: 'idTipoPago',
+  through: 'FacturaVSTipoPago',
+});
+
+TipoPago.belongsToMany(Factura, {
+  as: 'TipoPagoFactura',
+  through: 'FacturaVSTipoPago',
+});
+
+Factura.belongsToMany(Difunto, {
+  as: 'FacturaDifunto',
+  through: 'DifuntoVSFactura',
+});
+
+Difunto.belongsToMany(Factura, {
+  as: 'DifuntoFactura',
+  through: 'DifuntoVSFactura',
+});
+
+HistorialTiempoServicios.belongsTo(Factura, {
+  as: 'HistorialTiempoServicios',
+  foreignKey: 'numFactura',
 });
 
 Factura.belongsTo(Itebis, {
   as: 'FacturaItebis',
   foreignKey: 'idItebis',
+});
+
+//Compra
+Compra.belongsTo(Suplidor, {
+  as: 'CompraSuplidor',
+  foreignKey: 'idSuplidor',
+});
+
+Compra.belongsToMany(TipoPago, {
+  as: 'CompraTipoPago',
+  through: 'CompraVSTipoPago',
+});
+
+TipoPago.belongsToMany(Compra, {
+  as: 'TipoPagoCompra',
+  through: 'CompraVSTipoPago',
 });
 
 //DetalleFactura
@@ -379,6 +425,39 @@ DetalleFactura.belongsTo(Factura, {
 
 DetalleFactura.belongsTo(Producto, {
   as: 'DetalleFacturaProducto',
+  foreignKey: 'idProducto',
+});
+
+//DetalleCompra
+DetalleCompra.belongsTo(Compra, {
+  as: 'DetalleCompra',
+  foreignKey: 'numCompra',
+});
+
+DetalleCompra.belongsTo(Producto, {
+  as: 'DetalleCompraProducto',
+  foreignKey: 'idProducto',
+});
+
+//EntradaServicios
+EntradaServicios.belongsTo(Factura, {
+  as: 'EntradaServiciosFactura',
+  foreignKey: 'numFactura',
+});
+
+EntradaServicios.belongsTo(Producto, {
+  as: 'EntradaServiciosProducto',
+  foreignKey: 'idProducto',
+});
+
+//SalidaServicios
+SalidaServicios.belongsTo(Factura, {
+  as: 'SalidaServiciosFactura',
+  foreignKey: 'numFactura',
+});
+
+SalidaServicios.belongsTo(Producto, {
+  as: 'SalidaServiciosProducto',
   foreignKey: 'idProducto',
 });
 
@@ -455,4 +534,9 @@ module.exports = {
   ArmarPlan,
   UnidadMedida,
   HistorialSuscripcion,
+  HistorialTiempoServicios,
+  Compra,
+  DetalleCompra,
+  EntradaServicios,
+  SalidaServicios,
 };

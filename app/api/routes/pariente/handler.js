@@ -2,17 +2,23 @@ const { sequelize } = require('../../../db/config/database');
 const {
   Identidad,
   Pariente,
+  TipoIdentidad,
 } = require('../../../db/models/relaciones');
+const { getNameDireccion } = require('../../helpers/getNamesDireccion');
 const { createIdentidad, updateIdentidad } = require('../../helpers/identidad');
+const { createPariente } = require('../../helpers/pariente');
 const { createPersona, updatePersona } = require('../../helpers/persona');
-const { personParienteParams, clientParienteParams } = require('../../utils/constant');
+const {
+  personParienteParams,
+  clientParienteParams,
+} = require('../../utils/constant');
 
 // {
 //   "nombre" : "Jose Enmanuel",
 //   "apellido" : "Estrella Estrella",
 //   "sexo" : "M",
 //   "idCliente": "79a5dacf-d567-4f68-ae12-384277b189b8",
-//   "identidades": {"identidad":"40210806465", "idTipoIdentidad" : "2c3bd59c-c58f-4795-8dd5-bba9034984d4"},
+//   "identidades": {"identidad":"40210806465", "idTipoIdentidad" : "0c9e216a-3330-46bc-a249-cea4c8cd0f04"},
 //   "nacimiento" : "12/22/1999",
 //  "telefonos" : [{"telefono":"8096125752", "tipo":"casa"}, {"telefono":"8492777475", "tipo":"celular"}],
 //   "correos" : ["e@gmail.com", "a@gmail.com"],
@@ -32,62 +38,29 @@ module.exports = {
       telefonos = [],
       correos = [],
       direcciones = [],
+      statusEntidad = false,
     } = req.body;
     let data = {};
 
     try {
       await sequelize.transaction(async (transaction) => {
-        if (idPersonaCreate) {
-          data = await Pariente.create({
-            idPersona: idPersonaCreate,
-            idCliente,
-          });
-        } else {
-          const { status, idPersona, message } = await createPersona({
-            nombre,
-            nacimiento,
-            telefonos,
-            correos,
-            direcciones,
-            apellido,
-            sexo,
-            transaction,
-          });
-          if (!status) {
-            return res.status(409).send(message);
-          }
+        const { data, error, message } = await createPariente({
+          apellido,
+          sexo,
+          idCliente,
+          identidades,
+          idPersona: idPersonaCreate,
+          nombre,
+          nacimiento,
+          telefonos,
+          correos,
+          direcciones,
+          statusEntidad,
+          transaction,
+        });
 
-          const parienteExit = await Pariente.findOne({
-            where: { idPersona },
-          });
-
-          if (parienteExit) {
-            return res.status(409).send({
-              data: parienteExit,
-              message: 'Este Pariente ya esta registrado.',
-            });
-          }
-
-          data = await Pariente.create({
-            idPersona,
-            idCliente,
-          });
-        }
-
-        if (identidades) {
-          const {
-            status: statusE,
-            idIdentidad,
-            message: messageE,
-          } = await createIdentidad({
-            identidades,
-          });
-
-          if (!statusE) {
-            return res.status(409).send(messageE);
-          }
-
-          await data.setParienteIdentidad(idIdentidad);
+        if (error) {
+          return res.status(409).send(message);
         }
 
         return res.status(201).send({ data });
@@ -97,6 +70,8 @@ module.exports = {
     }
   },
   async getParientes(req, res) {
+    let parseData = [];
+
     try {
       const parientes = await Pariente.findAll({
         include: [
@@ -104,18 +79,97 @@ module.exports = {
           {
             model: Identidad,
             as: 'ParienteIdentidad',
+            attributes: ['serie'],
+            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
           },
           clientParienteParams,
         ],
+        order: [['updatedAt', 'DESC']],
       });
+      if (parientes.length) {
+        await Promise.all(
+          await parientes.map(async (pariente) => {
+            if (!pariente.ParientePersona) {
+              return;
+            }
 
-      return res.status(200).send({ data: parientes });
+            const {
+              idPariente,
+              idCliente,
+              idPersona,
+              ParientePersona: {
+                apellido,
+                status: personStatus,
+                idEntidad,
+                EntidadPersona: {
+                  nombre,
+                  nacimiento,
+                  status: entidadStatus,
+                  EntidadCorreo,
+                  EntidadTelefono,
+                  EntidadDireccion,
+                },
+                SexoPersona: { sexo },
+              },
+              ParienteIdentidad,
+              ParienteCliente: {
+                ClientePersona: {
+                  apellido: apellidoCliente,
+                  EntidadPersona: { nombre: nombreCliente },
+                },
+              },
+            } = pariente;
+
+            const telefonos = EntidadTelefono.map(
+              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+                idTelefono,
+                telefono,
+                tipo,
+              })
+            );
+
+            const identidades = ParienteIdentidad.map(
+              ({ serie, TipoIdentidad: { idTipoIdentidad, tipo } }) => ({
+                serie,
+                idTipoIdentidad,
+                tipo,
+              })
+            );
+
+            getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+
+            return parseData.push({
+              idPariente,
+              idCliente,
+              idPersona,
+              idEntidad,
+              nombre,
+              apellido,
+              nacimiento,
+              sexo,
+              nombreCliente,
+              apellidoCliente,
+              personStatus,
+              entidadStatus,
+              identidades: identidades,
+              correos: EntidadCorreo,
+              telefonos,
+              direcciones: EntidadDireccion,
+              ...getNameDireccions,
+            });
+          })
+        );
+      }
+
+      return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
   },
   async getParienteByIdentidad(req, res) {
     const { serie } = req.params;
+    let parseData = [];
+    let getNameDireccions = {};
 
     try {
       const pariente = await Pariente.findAll({
@@ -124,6 +178,8 @@ module.exports = {
           {
             model: Identidad,
             as: 'ParienteIdentidad',
+            attributes: ['serie'],
+            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
             where: {
               serie,
             },
@@ -132,21 +188,96 @@ module.exports = {
         ],
       });
 
-      return res.status(200).send({ data: pariente });
+      if (pariente.length) {
+        parseData = pariente.map(
+          ({
+            idPariente,
+            idCliente,
+            idPersona,
+            ParientePersona: {
+              apellido,
+              status: personStatus,
+              idEntidad,
+              EntidadPersona: {
+                nombre,
+                nacimiento,
+                status: entidadStatus,
+                EntidadCorreo,
+                EntidadTelefono,
+                EntidadDireccion,
+              },
+              SexoPersona: { sexo },
+            },
+            ParienteIdentidad,
+            ParienteCliente: {
+              ClientePersona: {
+                apellido: apellidoCliente,
+                EntidadPersona: { nombre: nombreCliente },
+              },
+            },
+          }) => {
+            const telefonos = EntidadTelefono.map(
+              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+                idTelefono,
+                telefono,
+                tipo,
+              })
+            );
+
+            const identidades = ParienteIdentidad.map(
+              ({ serie, TipoIdentidad: { idTipoIdentidad, tipo } }) => ({
+                serie,
+                idTipoIdentidad,
+                tipo,
+              })
+            );
+
+            return {
+              idPariente,
+              idCliente,
+              idPersona,
+              idEntidad,
+              nombre,
+              apellido,
+              nacimiento,
+              sexo,
+              nombreCliente,
+              apellidoCliente,
+              personStatus,
+              entidadStatus,
+              identidades: identidades,
+              correos: EntidadCorreo,
+              telefonos,
+              direcciones: EntidadDireccion,
+            };
+          }
+        );
+
+        const { direcciones } = parseData[0];
+        getNameDireccions = await getNameDireccion(direcciones[0]);
+      }
+
+      return res
+        .status(200)
+        .send({ data: { ...parseData[0], ...getNameDireccions } });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
   },
   async getParienteByClient(req, res) {
     const { idCliente } = req.params;
+    let parseData = [];
+    let getNameDireccions = {};
 
     try {
-      const pariente = await Pariente.findAll({
+      const parientes = await Pariente.findAll({
         include: [
           personParienteParams,
           {
             model: Identidad,
             as: 'ParienteIdentidad',
+            attributes: ['serie'],
+            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
           },
           clientParienteParams,
         ],
@@ -155,7 +286,82 @@ module.exports = {
         },
       });
 
-      return res.status(200).send({ data: pariente });
+      if (parientes.length) {
+        await Promise.all(
+          await parientes.map(async (pariente) => {
+            if (!pariente.ParientePersona) {
+              return;
+            }
+
+            const {
+              idPariente,
+              idCliente,
+              idPersona,
+              ParientePersona: {
+                apellido,
+                status: personStatus,
+                idEntidad,
+                EntidadPersona: {
+                  nombre,
+                  nacimiento,
+                  status: entidadStatus,
+                  EntidadCorreo,
+                  EntidadTelefono,
+                  EntidadDireccion,
+                },
+                SexoPersona: { sexo },
+              },
+              ParienteIdentidad,
+              ParienteCliente: {
+                ClientePersona: {
+                  apellido: apellidoCliente,
+                  EntidadPersona: { nombre: nombreCliente },
+                },
+              },
+            } = pariente;
+
+            const telefonos = EntidadTelefono.map(
+              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+                idTelefono,
+                telefono,
+                tipo,
+              })
+            );
+
+            const identidades = ParienteIdentidad.map(
+              ({ serie, TipoIdentidad: { idTipoIdentidad, tipo } }) => ({
+                serie,
+                idTipoIdentidad,
+                tipo,
+              })
+            );
+
+            getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+
+            return parseData.push({
+              idPariente,
+              idCliente,
+              idPersona,
+              idEntidad,
+              nombre,
+              apellido,
+              nacimiento,
+              sexo,
+              nombreCliente,
+              apellidoCliente,
+              personStatus,
+              entidadStatus,
+              identidades: identidades,
+              correos: EntidadCorreo,
+              telefonos,
+              direcciones: EntidadDireccion,
+              ...getNameDireccions,
+            });
+          })
+        );
+      }
+
+      return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -250,6 +456,30 @@ module.exports = {
           idCliente,
         },
         { where: { idPariente } }
+      );
+
+      return res.status(201).send({ data });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+  async deletePariente(req, res) {
+    const { idEntidad } = req.body;
+
+    try {
+      const getPariente = await Entidad.findOne({
+        where: { idEntidad },
+      });
+
+      if (!getPariente) {
+        return res.status(409).send({ message: 'Este Pariente no existe' });
+      }
+
+      const data = await Entidad.update(
+        {
+          status: false,
+        },
+        { where: { idEntidad } }
       );
 
       return res.status(201).send({ data });
