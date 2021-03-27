@@ -7,6 +7,8 @@ const {
   Sexo,
   Cliente,
   TipoTelefono,
+  Identidad,
+  TipoIdentidad,
 } = require('../../db/models/relaciones');
 
 const personEmployeParams = {
@@ -73,7 +75,7 @@ const personParienteParams = {
     {
       model: Entidad,
       as: 'EntidadPersona',
-      where: { status: true },
+      // where: { status: true },
       include: [
         {
           model: Correo,
@@ -101,7 +103,6 @@ const personDeceasedParams = {
     {
       model: Entidad,
       as: 'EntidadPersona',
-      where: { status: true },
       include: [
         {
           model: Correo,
@@ -135,7 +136,33 @@ const clientParienteParams = {
           model: Entidad,
           as: 'EntidadPersona',
           attributes: ['nombre', 'status'],
-          where: { status: true },
+          // where: { status: true },
+        },
+        { model: Sexo, as: 'SexoPersona', attributes: ['sexo'] },
+      ],
+    },
+  ],
+};
+
+const clientSuscripcionParams = {
+  model: Cliente,
+  as: 'SuscripcionCliente',
+  attributes: ['idCliente'],
+  include: [
+    {
+      model: Identidad,
+      as: 'ClienteIdentidad',
+      attributes: ['serie'],
+      include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
+    },
+    {
+      model: Persona,
+      as: 'ClientePersona',
+      include: [
+        {
+          model: Entidad,
+          as: 'EntidadPersona',
+          // where: { status: true },
         },
         { model: Sexo, as: 'SexoPersona', attributes: ['sexo'] },
       ],
@@ -157,7 +184,7 @@ const clientDeceasedParams = {
           model: Entidad,
           as: 'EntidadPersona',
           attributes: ['nombre', 'status'],
-          where: { status: true },
+          // where: { status: true },
         },
         { model: Sexo, as: 'SexoPersona', attributes: ['sexo'] },
       ],
@@ -172,4 +199,5 @@ module.exports = {
   personEmployeParams,
   personDeceasedParams,
   clientDeceasedParams,
+  clientSuscripcionParams,
 };

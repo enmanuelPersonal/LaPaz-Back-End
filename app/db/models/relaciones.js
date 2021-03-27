@@ -203,9 +203,9 @@ Empleado.belongsTo(Identidad, {
   foreignKey: 'idIdentidad',
 });
 
-Empleado.hasMany(HistorialSuscripcion, {
-  as: 'EmpleadoHistorialSuscripcion',
-  foreignKey: 'idEmpleado',
+Usuario.hasMany(HistorialSuscripcion, {
+  as: 'UsuarioHistorialSuscripcion',
+  foreignKey: 'idUsuario',
 });
 
 //Pariente

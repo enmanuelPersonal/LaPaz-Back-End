@@ -21,7 +21,7 @@ const Suscripcion = sequelize.define(
     status: {
       allowNull: false,
       type: DataTypes.TEXT,
-      defaultValue: 'Espera',
+      defaultValue: 'Proceso',
     },
   },
   {}

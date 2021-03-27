@@ -8,7 +8,7 @@ const HistorialSuscripcion = sequelize.define(
   {
     fecha: {
       allowNull: false,
-      defaultValue: DataTypes.DATE,
+      defaultValue: Date.now(),
       type: DataTypes.DATE,
     },
   },

@@ -8,13 +8,13 @@ module.exports = {
     sexo,
     idCliente,
     identidades,
-    idPersona: idPersonaCreate,
+    idPersona: idPersonaCreate = '',
     nombre,
     nacimiento,
     telefonos,
     correos,
     direcciones,
-    statusEntidad,
+    statusEntidad = false,
     transaction,
   }) {
     let data = {};
