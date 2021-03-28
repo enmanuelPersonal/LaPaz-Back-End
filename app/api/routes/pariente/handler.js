@@ -70,6 +70,7 @@ module.exports = {
   },
   async getParientes(req, res) {
     let parseData = [];
+    let getNameDireccions = {};
 
     try {
       const parientes = await Pariente.findAll({
@@ -135,7 +136,9 @@ module.exports = {
               })
             );
 
-            getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+            if (EntidadDireccion[0]) {
+              getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+            }
 
             return parseData.push({
               idPariente,

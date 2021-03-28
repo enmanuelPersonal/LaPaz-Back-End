@@ -47,7 +47,7 @@ const personClientParams = {
     {
       model: Entidad,
       as: 'EntidadPersona',
-      where: { status: true },
+      // where: { status: true },
       include: [
         {
           model: Correo,
