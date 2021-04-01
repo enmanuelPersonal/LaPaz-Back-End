@@ -8,6 +8,7 @@ const {
 const { createCliente } = require('../../helpers/cliente');
 const { createPariente } = require('../../helpers/pariente');
 const { clientSuscripcionParams } = require('../../utils/constant');
+const { getParientes } = require('./getParientes');
 
 // {
 //   "client": {
@@ -37,6 +38,7 @@ const { clientSuscripcionParams } = require('../../utils/constant');
 // ],
 // "idTipoPlan": "ded27e93-0b9c-4497-8a94-c881561f4b21",
 // "monto": 3000
+// "idUsuario": "2ert2qwertgwer"
 // }
 
 // {
@@ -56,6 +58,7 @@ module.exports = {
       idTipoPlan,
       monto,
       idUsuario,
+      status = 'Proceso',
     } = req.body;
     let getData = {},
       errorParientes = [];
@@ -67,6 +70,7 @@ module.exports = {
             idCliente: idClient,
             idTipoPlan,
             monto,
+            status,
           });
 
           await HistorialSuscripcion.create({
@@ -115,6 +119,7 @@ module.exports = {
               idCliente,
               idTipoPlan,
               monto,
+              status,
             });
 
             await HistorialSuscripcion.create({
@@ -144,55 +149,66 @@ module.exports = {
         ],
         order: [['updatedAt', 'DESC']],
       });
+
       if (suscripciones.length) {
-        parseData = suscripciones.map((suscripcion) => {
-          if (!suscripcion.SuscripcionCliente.ClientePersona) {
-            return;
-          }
+        await Promise.all(
+          await suscripciones.map(async (suscripcion) => {
+            let getAllParientes = [];
+            if (!suscripcion.SuscripcionCliente.ClientePersona) {
+              return;
+            }
 
-          const {
-            idSuscripcion,
-            monto,
-            status: statusSuscripcion,
-            createdAt: fecha,
-            idCliente,
-            idTipoPlan,
-            SuscripcionCliente: {
-              ClientePersona: {
-                apellido,
-                status: personStatus,
-                idEntidad,
-                EntidadPersona: { nombre, nacimiento, status: entidadStatus },
-                SexoPersona: { sexo },
+            const {
+              idSuscripcion,
+              monto,
+              status: statusSuscripcion,
+              createdAt: fecha,
+              idCliente,
+              idTipoPlan,
+              SuscripcionCliente: {
+                ClientePersona: {
+                  apellido,
+                  status: personStatus,
+                  idEntidad,
+                  EntidadPersona: { nombre, nacimiento, status: entidadStatus },
+                  SexoPersona: { sexo },
+                },
+                ClienteIdentidad: {
+                  serie,
+                  TipoIdentidad: { tipo: tipoIdentidad },
+                },
               },
-              ClienteIdentidad: {
-                serie,
-                TipoIdentidad: { tipo: tipoIdentidad },
-              },
-            },
-            SuscripcionTipoPlan: { tipo, monto: cuotas, status: statusPlan },
-          } = suscripcion;
+              SuscripcionTipoPlan: { tipo, monto: cuotas, status: statusPlan },
+            } = suscripcion;
 
-          return {
-            idSuscripcion,
-            monto,
-            statusSuscripcion,
-            fecha,
-            idCliente,
-            idTipoPlan,
-            apellido,
-            personStatus,
-            idEntidad,
-            nombre,
-            nacimiento,
-            entidadStatus,
-            sexo,
-            tipoPlan: tipo,
-            cuotas,
-            statusPlan,
-            identidades: { serie, tipo: tipoIdentidad },
-          };
-        });
+            const { error, parientes } = await getParientes({ idCliente });
+
+            if (!error) {
+              getAllParientes = parientes;
+            }
+
+            return parseData.push({
+              idSuscripcion,
+              monto,
+              statusSuscripcion,
+              fecha,
+              idCliente,
+              idTipoPlan,
+              apellido,
+              personStatus,
+              idEntidad,
+              nombre,
+              nacimiento,
+              entidadStatus,
+              sexo,
+              tipoPlan: tipo,
+              cuotas,
+              statusPlan,
+              identidades: { identidad: serie, tipo: tipoIdentidad },
+              parientes: getAllParientes,
+            });
+          })
+        );
       }
       return res.status(200).send({ data: parseData });
     } catch (error) {
@@ -258,7 +274,7 @@ module.exports = {
             tipoPlan: tipo,
             cuotas,
             statusPlan,
-            identidades: { serie, tipo: tipoIdentidad },
+            identidades: { identidad: serie, tipo: tipoIdentidad },
           };
         });
       }
@@ -312,6 +328,25 @@ module.exports = {
             await Entidad.update(
               {
                 status: true,
+              },
+              { where: { idEntidad } }
+            );
+            return;
+          })
+        );
+      } else {
+        await Entidad.update(
+          {
+            status: false,
+          },
+          { where: { idEntidad: idClienteEntidad } }
+        );
+
+        await Promise.all(
+          await idParientes.map(async (idEntidad) => {
+            await Entidad.update(
+              {
+                status: false,
               },
               { where: { idEntidad } }
             );

@@ -36,7 +36,6 @@ module.exports = {
       direcciones = [],
       statusEntidad = false,
     } = req.body;
-    let data = {};
 
     try {
       await sequelize.transaction(async (transaction) => {

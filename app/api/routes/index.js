@@ -12,6 +12,8 @@ const identityTypeRoute = require('./tipoIdentidad/route');
 const cargoRoute = require('./cargo/route');
 const suscripcionRoute = require('./suscripcion/route');
 const imgRoute = require('./img/route');
+const mensualidadRoute = require('./mensualidad/route');
+const tipoPlandRoute = require('./tipoPlan/route');
 
 const router = Router();
 
@@ -27,5 +29,7 @@ router.use('/typeIdentity', identityTypeRoute);
 router.use('/cargo', cargoRoute);
 router.use('/suscripcion', suscripcionRoute);
 router.use('/img', imgRoute);
+router.use('/mensualidad', mensualidadRoute);
+router.use('/typePlan', tipoPlandRoute);
 
 module.exports = router;

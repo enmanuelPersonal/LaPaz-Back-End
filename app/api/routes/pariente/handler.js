@@ -255,8 +255,9 @@ module.exports = {
           }
         );
 
-        const { direcciones } = parseData[0];
-        getNameDireccions = await getNameDireccion(direcciones[0]);
+        if (parseData[0].direcciones.length) {
+          getNameDireccions = await getNameDireccion(direcciones[0]);
+        }
       }
 
       return res
@@ -338,7 +339,9 @@ module.exports = {
               })
             );
 
-            getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+            if (EntidadDireccion[0]) {
+              getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+            }
 
             return parseData.push({
               idPariente,

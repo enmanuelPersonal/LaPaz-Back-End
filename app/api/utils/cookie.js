@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = ({ tipoUsuario, idEntidad, nombre, permisos }) => {
+module.exports = ({ tipoUsuario, idEntidad, idUsuario, nombre, permisos }) => {
   const { JWT_SECRET } = process.env;
   const cookie = jwt.sign(
     {
       tipoUsuario,
       idEntidad,
+      idUsuario,
       nombre,
       permisos,
     },
