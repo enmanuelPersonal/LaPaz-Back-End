@@ -11,6 +11,8 @@ const { createPersona, updatePersona } = require('../../helpers/persona');
 const {
   personParienteParams,
   clientParienteParams,
+  personSuscripcionParienteParams,
+  clientParienteSuscripcionParams,
 } = require('../../utils/constant');
 
 // {
@@ -69,6 +71,7 @@ module.exports = {
     }
   },
   async getParientes(req, res) {
+    const { limit = 10 } = req.params;
     let parseData = [];
     let getNameDireccions = {};
 
@@ -161,6 +164,10 @@ module.exports = {
             });
           })
         );
+      }
+
+      if (parseData.length > limit) {
+        parseData = parseData.slice(0, limit + 1);
       }
 
       return res.status(200).send({ data: parseData });
@@ -268,21 +275,21 @@ module.exports = {
     }
   },
   async getParienteByClient(req, res) {
-    const { idCliente } = req.params;
+    const { idCliente, limit = 5 } = req.params;
     let parseData = [];
     let getNameDireccions = {};
 
     try {
       const parientes = await Pariente.findAll({
         include: [
-          personParienteParams,
+          personSuscripcionParienteParams,
           {
             model: Identidad,
             as: 'ParienteIdentidad',
             attributes: ['serie'],
             include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
           },
-          clientParienteParams,
+          clientParienteSuscripcionParams,
         ],
         where: {
           idCliente,
@@ -366,6 +373,10 @@ module.exports = {
         );
       }
 
+      if (parseData.length > limit) {
+        parseData = parseData.slice(0, limit + 1);
+      }
+      
       return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });

@@ -140,6 +140,7 @@ module.exports = {
     }
   },
   async getSuscripciones(req, res) {
+    const { limit = 10 } = req.params;
     let parseData = [];
     try {
       const suscripciones = await Suscripcion.findAll({
@@ -210,6 +211,11 @@ module.exports = {
           })
         );
       }
+
+      if (parseData.length > limit) {
+        parseData = parseData.slice(0, limit + 1);
+      }
+
       return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
@@ -378,7 +384,12 @@ module.exports = {
     }
   },
   async deleteSuscripcion(req, res) {
-    const { idSuscripcion, idParientes = [], idClienteEntidad = '' } = req.body;
+    const {
+      idSuscripcion,
+      idParientes = [],
+      idClienteEntidad = '',
+      idUsuario = '',
+    } = req.body;
     let data = {};
 
     try {
@@ -418,7 +429,7 @@ module.exports = {
 
       await HistorialSuscripcion.create({
         idCliente: getSuscripcion.idCliente,
-        idUsuario: getSuscripcion.idUsuario,
+        idUsuario,
         idTipoPlan: getSuscripcion.idTipoPlan,
         idSuscripcion,
       });

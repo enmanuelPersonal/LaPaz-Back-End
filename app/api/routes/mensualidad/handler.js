@@ -82,6 +82,7 @@ module.exports = {
     }
   },
   async getMensualidades(req, res) {
+    const { limit = 10 } = req.params;
     let parseData = [];
     try {
       const mensualidades = await Mensualidad.findAll({
@@ -141,6 +142,11 @@ module.exports = {
       //     };
       //   });
       // }
+
+      if (parseData.length > limit) {
+        parseData = parseData.slice(0, limit + 1);
+      }
+      
       return res.status(200).send({ data: mensualidades });
     } catch (error) {
       return res.status(500).send({ message: error.message });

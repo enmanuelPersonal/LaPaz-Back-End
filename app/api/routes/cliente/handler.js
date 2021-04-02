@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { sequelize } = require('../../../db/config/database');
 const {
   Identidad,
@@ -9,7 +10,10 @@ const { createCliente } = require('../../helpers/cliente');
 const { getNameDireccion } = require('../../helpers/getNamesDireccion');
 const { updateIdentidad } = require('../../helpers/identidad');
 const { updatePersona } = require('../../helpers/persona');
-const { personClientParams } = require('../../utils/constant');
+const {
+  personClientParams,
+  personWhereClientParams,
+} = require('../../utils/constant');
 
 // {
 //   "nombre" : "Jose Enmanuel",
@@ -64,6 +68,7 @@ module.exports = {
     }
   },
   async getClients(req, res) {
+    const { limit = 10 } = req.params;
     let parseData = [];
     try {
       const clients = await Cliente.findAll({
@@ -138,15 +143,28 @@ module.exports = {
           })
         );
       }
+
+      if (parseData.length > limit) {
+        parseData = parseData.slice(0, limit + 1);
+      }
+
       return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
   },
   async getClientsByIdentidad(req, res) {
-    const { serie } = req.params;
+    const { finder } = req.params;
+    const identifier = `%${finder}%`;
     let parseData = [];
     let getNameDireccions = {};
+    let where = {};
+
+    if (!isNaN(Number(finder))) {
+      where = {
+        serie: { [Op.iLike]: identifier },
+      };
+    }
 
     try {
       const client = await Cliente.findAll({
@@ -157,16 +175,18 @@ module.exports = {
             as: 'ClienteIdentidad',
             attributes: ['serie'],
             include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
-            where: {
-              serie,
-            },
+            where,
           },
         ],
       });
 
       if (client.length) {
-        parseData = client.map(
-          ({
+        parseData = client.map((client) => {
+          if (!client.ClientePersona) {
+            return;
+          }
+
+          const {
             idCliente,
             idPersona,
             idIdentidad,
@@ -188,36 +208,38 @@ module.exports = {
               serie,
               TipoIdentidad: { idTipoIdentidad },
             },
-          }) => {
-            const telefonos = EntidadTelefono.map(
-              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
-                idTelefono,
-                telefono,
-                tipo,
-              })
-            );
+          } = client;
 
-            return {
-              idCliente,
-              idPersona,
-              idIdentidad,
-              idEntidad,
-              nombre,
-              apellido,
-              nacimiento,
-              sexo,
-              personStatus,
-              entidadStatus,
-              identidades: { serie, idTipoIdentidad },
-              correos: EntidadCorreo,
-              telefonos,
-              direcciones: EntidadDireccion,
-            };
-          }
-        );
+          const telefonos = EntidadTelefono.map(
+            ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+              idTelefono,
+              telefono,
+              tipo,
+            })
+          );
 
-        const { direcciones } = parseData[0];
-        getNameDireccions = await getNameDireccion(direcciones[0]);
+          return {
+            idCliente,
+            idPersona,
+            idIdentidad,
+            idEntidad,
+            nombre,
+            apellido,
+            nacimiento,
+            sexo,
+            personStatus,
+            entidadStatus,
+            identidades: { serie, idTipoIdentidad },
+            correos: EntidadCorreo,
+            telefonos,
+            direcciones: EntidadDireccion,
+          };
+        });
+
+        if (parseData[0]) {
+          const { direcciones } = parseData[0];
+          getNameDireccions = await getNameDireccion(direcciones[0]);
+        }
       }
 
       return res

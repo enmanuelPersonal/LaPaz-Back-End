@@ -102,6 +102,7 @@ module.exports = {
     }
   },
   async getEmployes(req, res) {
+    const { limit = 10 } = req.params;
     let parseData = [],
       getNameDireccions = {};
     try {
@@ -190,6 +191,11 @@ module.exports = {
           })
         );
       }
+
+      if (parseData.length > limit) {
+        parseData = parseData.slice(0, limit + 1);
+      }
+
       return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });

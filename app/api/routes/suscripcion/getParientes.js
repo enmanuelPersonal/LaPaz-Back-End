@@ -1,5 +1,5 @@
 const { Pariente, Identidad } = require('../../../db/models/relaciones');
-const { personParienteParams } = require('../../utils/constant');
+const { personSuscripcionParienteParams } = require('../../utils/constant');
 
 module.exports = {
   async getParientes({ idCliente }) {
@@ -7,7 +7,7 @@ module.exports = {
     try {
       const parientes = await Pariente.findAll({
         include: [
-          personParienteParams,
+          personSuscripcionParienteParams,
           {
             model: Identidad,
             as: 'ParienteIdentidad',
