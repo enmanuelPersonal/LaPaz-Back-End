@@ -82,7 +82,7 @@ module.exports = {
     }
   },
   async getMensualidades(req, res) {
-    const { limit = 10 } = req.params;
+    const { limit = 10 } = req.query;
     let parseData = [];
     try {
       const mensualidades = await Mensualidad.findAll({

@@ -71,7 +71,7 @@ module.exports = {
     }
   },
   async getParientes(req, res) {
-    const { limit = 10 } = req.params;
+    const { limit = 10 } = req.query;
     let parseData = [];
     let getNameDireccions = {};
 
@@ -275,7 +275,9 @@ module.exports = {
     }
   },
   async getParienteByClient(req, res) {
-    const { idCliente, limit = 5 } = req.params;
+    const { idCliente } = req.params;
+    const { limit = 5 } = req.query;
+
     let parseData = [];
     let getNameDireccions = {};
 
@@ -376,7 +378,7 @@ module.exports = {
       if (parseData.length > limit) {
         parseData = parseData.slice(0, limit + 1);
       }
-      
+
       return res.status(200).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });

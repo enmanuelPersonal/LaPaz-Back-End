@@ -102,7 +102,7 @@ module.exports = {
     }
   },
   async getEmployes(req, res) {
-    const { limit = 10 } = req.params;
+    const { limit = 10 } = req.query;
     let parseData = [],
       getNameDireccions = {};
     try {

@@ -11,7 +11,10 @@ const {
   TipoPago,
   TipoPlan,
   UnidadMedida,
-  Sexo
+  Sexo,
+  TipoUsuario,
+  Categoria,
+  TipoProducto,
 } = require('../models/relaciones');
 
 (async function () {
@@ -27,10 +30,15 @@ const {
       console.log('Seed TipoTelefono'),
       await Permisos.bulkCreate(
         [
-          { permiso: 'venta' },
-          { permiso: 'compra' },
-          { permiso: 'cliente' },
-          { permiso: 'lectura' },
+          { permiso: 'ventas' },
+          { permiso: 'compras' },
+          { permiso: 'suscripcion' },
+          { permiso: 'dashboard' },
+          { permiso: 'reportes' },
+          { permiso: 'inventario' },
+          { permiso: 'planes' },
+          { permiso: 'usuarios' },
+          { permiso: 'empleados' },
         ],
         {
           validate: true,
@@ -106,17 +114,33 @@ const {
         }
       ),
       console.log('Seed UnidadMedida'),
-      await Sexo.bulkCreate(
+      await Sexo.bulkCreate([{ sexo: 'M' }, { sexo: 'F' }, { sexo: 'Otro' }], {
+        validate: true,
+      }),
+      console.log('Seed Sexo'),
+      await TipoUsuario.bulkCreate([{ tipo: 'cliente corriente' }], {
+        validate: true,
+      }),
+      console.log('Seed Tipo Usuario'),
+      await Categoria.bulkCreate(
         [
-          { sexo: 'M' },
-          { sexo: 'F' },
-          { sexo: 'Otro' },
+          { categoria: 'arreglos' },
+          { categoria: 'ataudes' },
+          { categoria: 'lapidas' },
+          { categoria: 'vehiculos' },
         ],
         {
           validate: true,
         }
       ),
-      console.log('Seed Sexo')
+      console.log('Seed Categoria'),
+      await TipoProducto.bulkCreate(
+        [{ tipo: 'servicio' }, { tipo: 'producto' }],
+        {
+          validate: true,
+        }
+      ),
+      console.log('Seed Tipo Productos')
     );
   } catch (error) {
     console.error('No es posible crear los Seeders', error);

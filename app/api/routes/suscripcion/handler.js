@@ -140,7 +140,7 @@ module.exports = {
     }
   },
   async getSuscripciones(req, res) {
-    const { limit = 10 } = req.params;
+    const { limit = 10 } = req.query;
     let parseData = [];
     try {
       const suscripciones = await Suscripcion.findAll({

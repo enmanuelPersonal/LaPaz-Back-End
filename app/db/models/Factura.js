@@ -14,6 +14,9 @@ const Factura = sequelize.define(
       type: DataTypes.INTEGER,
       unique: true,
     },
+    NFC: {
+      type: DataTypes.TEXT,
+    },
     status: {
       allowNull: false,
       type: DataTypes.BOOLEAN,

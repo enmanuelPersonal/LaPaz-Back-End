@@ -62,7 +62,7 @@ module.exports = {
     }
   },
   async getDeceased(req, res) {
-    const { limit = 10 } = req.params;
+    const { limit = 10 } = req.query;
     let parseData = [];
 
     try {

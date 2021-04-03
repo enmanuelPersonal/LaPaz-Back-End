@@ -467,6 +467,11 @@ Transporte.belongsTo(Factura, {
   foreignKey: 'numFactura',
 });
 
+Transporte.belongsTo(Empleado, {
+  as: 'TransporteEmpleado',
+  foreignKey: 'idEmpleado',
+});
+
 Transporte.belongsTo(Vehiculo, {
   as: 'TransporteVehiculo',
   foreignKey: 'idVehiculo',

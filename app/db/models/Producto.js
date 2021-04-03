@@ -14,6 +14,10 @@ const Producto = sequelize.define(
       type: DataTypes.UUID,
       unique: true,
     },
+    nombre: {
+      allowNull: false,
+      type: DataTypes.TEXT,
+    },
     descripcion: {
       allowNull: false,
       type: DataTypes.TEXT,
