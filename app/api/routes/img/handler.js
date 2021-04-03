@@ -10,9 +10,10 @@ module.exports = {
 
     if (ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg' && ext !== '.gif') {
       await fs.unlink(imgTemPath);
+
       return res
-        .status(500)
-        .json({ error: 'La imagen no cumple con el formato valido' });
+        .status(409)
+        .send({ error: 'La imagen no cumple con el formato valido' });
     }
 
     let imgUrl = randomName();
@@ -20,6 +21,8 @@ module.exports = {
       const targetPath = path.resolve(`app/public/uploads/${imgUrl}${ext}`);
 
       await fs.rename(imgTemPath, targetPath);
+
+      return res.status(201).send({ data: targetPath });
     } catch (error) {
       await fs.unlink(imgTemPath);
       return res.status(500).json({ error: 'Error al subir la imagen' });
