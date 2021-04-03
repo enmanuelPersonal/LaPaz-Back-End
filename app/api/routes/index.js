@@ -15,6 +15,7 @@ const imgRoute = require('./img/route');
 const mensualidadRoute = require('./mensualidad/route');
 const tipoPlandRoute = require('./tipoPlan/route');
 const permisosRoute = require('./permisos/route');
+const categoriaRoute = require('./categoria/route');
 
 const router = Router();
 
@@ -33,5 +34,6 @@ router.use('/img', imgRoute);
 router.use('/mensualidad', mensualidadRoute);
 router.use('/typePlan', tipoPlandRoute);
 router.use('/permisos', permisosRoute);
+router.use('/categoria', categoriaRoute);
 
 module.exports = router;
