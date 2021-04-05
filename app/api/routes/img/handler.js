@@ -4,8 +4,8 @@ const randomName = require('../../utils/randomName');
 
 module.exports = {
   async addImg(req, res) {
-    console.log(req);
     const file = req.file;
+
     const ext = path.extname(file.originalname).toLocaleLowerCase();
     const imgTemPath = file.path;
 
@@ -23,7 +23,9 @@ module.exports = {
 
       await fs.rename(imgTemPath, targetPath);
 
-      return res.status(201).send({ data: targetPath });
+      return res
+        .status(201)
+        .send({ data: `app/public/uploads/${imgUrl}${ext}` });
     } catch (error) {
       await fs.unlink(imgTemPath);
       return res.status(500).json({ error: 'Error al subir la imagen' });
