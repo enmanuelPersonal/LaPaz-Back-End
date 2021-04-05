@@ -35,12 +35,12 @@ module.exports = {
     }
   },
   async getPermisoByTypeUsuario(req, res) {
-    const { tipo } = req.params;
+    const { idTipoUsuario } = req.params;
     let getPermisos = [];
     try {
       const data = await TipoUsuario.findOne({
         include: [{ model: Permisos, as: 'TipoUsuarioPermisos' }],
-        where: { tipo },
+        where: { idTipoUsuario },
       });
 
       if (data) {

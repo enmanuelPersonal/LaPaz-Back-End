@@ -6,6 +6,6 @@ const handler = require('./handler');
 const router = Router();
 
 router.post('/add', authenticator, handler.addTypeUser);
-router.get('/', authenticator, handler.getAllTypeUser);
+router.get('/', handler.getAllTypeUser);
 
 module.exports = router;

@@ -344,7 +344,42 @@ module.exports = {
       return res.status(500).send({ message: error.message });
     }
   },
+  async getTypeProducto(req, res) {
+    let parseData = [];
 
+    try {
+      const typeProductos = await TipoProducto.findAll();
+
+      if (typeProductos.length) {
+        parseData = typeProductos.map(({ idTipoProducto, tipo }) => ({
+          idTipoProducto,
+          tipo,
+        }));
+      }
+
+      return res.status(200).send({ data: parseData });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+  async getCategoria(req, res) {
+    let parseData = [];
+
+    try {
+      const categorias = await Categoria.findAll();
+
+      if (categorias.length) {
+        parseData = categorias.map(({ idCategoria, categoria }) => ({
+          idCategoria,
+          categoria,
+        }));
+      }
+
+      return res.status(200).send({ data: parseData });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
   // {
   //   "idProducto": "dfcc8770-1785-401e-ae97-4be036d2ff7d",
   //   "nombre": "ataud",
@@ -370,9 +405,9 @@ module.exports = {
       idImagenProducto,
       idProductoLog,
       url = '',
-      stock = 0,
-      costo = 0,
-      precio = 0,
+      // stock = 0,
+      // costo = 0,
+      // precio = 0,
       reorden = 20,
     } = req.body;
     let data = {};
@@ -407,9 +442,9 @@ module.exports = {
 
         await ProductoLog.update(
           {
-            stock,
-            costo,
-            precio,
+            // stock,
+            // costo,
+            // precio,
             reorden,
             idProducto,
           },

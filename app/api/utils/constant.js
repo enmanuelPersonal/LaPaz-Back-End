@@ -40,6 +40,27 @@ const personEmployeParams = {
   ],
 };
 
+const personUserParams = 
+    {
+      model: Entidad,
+      as: 'EntidadUsuario',
+      where: { status: true },
+      include: [
+        {
+          model: Correo,
+          as: 'EntidadCorreo',
+          attributes: ['idCorreo', 'correo'],
+        },
+        {
+          model: Telefono,
+          as: 'EntidadTelefono',
+          attributes: ['idTelefono', 'telefono', 'idTipoTelefono'],
+          include: [{ model: TipoTelefono, as: 'TipoTele' }],
+        },
+        { model: Direccion, as: 'EntidadDireccion' },
+      ],
+    };
+
 const personClientParams = {
   model: Persona,
   as: 'ClientePersona',
@@ -296,4 +317,5 @@ module.exports = {
   personSuscripcionParienteParams,
   clientParienteSuscripcionParams,
   personWhereClientParams,
+  personUserParams
 };

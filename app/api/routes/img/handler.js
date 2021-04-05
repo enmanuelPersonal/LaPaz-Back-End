@@ -4,6 +4,7 @@ const randomName = require('../../utils/randomName');
 
 module.exports = {
   async addImg(req, res) {
+    console.log(req);
     const file = req.file;
     const ext = path.extname(file.originalname).toLocaleLowerCase();
     const imgTemPath = file.path;
