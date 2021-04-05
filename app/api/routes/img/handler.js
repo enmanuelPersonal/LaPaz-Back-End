@@ -23,9 +23,7 @@ module.exports = {
 
       await fs.rename(imgTemPath, targetPath);
 
-      return res
-        .status(201)
-        .send({ data: `app/public/uploads/${imgUrl}${ext}` });
+      return res.status(201).send({ data: `${imgUrl}${ext}` });
     } catch (error) {
       await fs.unlink(imgTemPath);
       return res.status(500).json({ error: 'Error al subir la imagen' });
