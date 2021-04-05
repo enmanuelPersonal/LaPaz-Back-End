@@ -18,11 +18,9 @@ module.exports = {
     } = req.authEntity;
 
     try {
-      return res
-        .status(200)
-        .send({
-          data: { tipoUsuario, idUsuario, idEntidad, nombre, permisos },
-        });
+      return res.status(200).send({
+        data: { tipoUsuario, idUsuario, idEntidad, nombre, permisos },
+      });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }

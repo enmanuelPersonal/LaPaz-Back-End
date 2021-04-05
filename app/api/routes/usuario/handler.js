@@ -181,7 +181,7 @@ module.exports = {
           idEntidad,
           idTipoUsuario,
         },
-        { where: { idUsuario } }
+        { where: { idUsuario }, individualHooks: true }
       );
 
       return res.status(201).send({ data });
@@ -191,7 +191,7 @@ module.exports = {
   },
   async deleteUser(req, res) {
     const { idUsuario } = req.body;
-console.log("object", idUsuario);
+
     try {
       await Usuario.destroy({ where: { idUsuario } });
 
