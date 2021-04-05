@@ -40,10 +40,34 @@ const personEmployeParams = {
   ],
 };
 
-const personUserParams = 
+const personUserParams = {
+  model: Entidad,
+  as: 'EntidadUsuario',
+  where: { status: true },
+  include: [
+    {
+      model: Correo,
+      as: 'EntidadCorreo',
+      attributes: ['idCorreo', 'correo'],
+    },
+    {
+      model: Telefono,
+      as: 'EntidadTelefono',
+      attributes: ['idTelefono', 'telefono', 'idTipoTelefono'],
+      include: [{ model: TipoTelefono, as: 'TipoTele' }],
+    },
+    { model: Direccion, as: 'EntidadDireccion' },
+  ],
+};
+
+const personClientParams = {
+  model: Persona,
+  as: 'ClientePersona',
+
+  include: [
     {
       model: Entidad,
-      as: 'EntidadUsuario',
+      as: 'EntidadPersona',
       where: { status: true },
       include: [
         {
@@ -59,11 +83,14 @@ const personUserParams =
         },
         { model: Direccion, as: 'EntidadDireccion' },
       ],
-    };
+    },
+    { model: Sexo, as: 'SexoPersona' },
+  ],
+};
 
-const personClientParams = {
+const personSuplidorParams = {
   model: Persona,
-  as: 'ClientePersona',
+  as: 'SuplidorPersona',
 
   include: [
     {
@@ -282,7 +309,7 @@ const personWhereClientParams = (identifier, finder) => {
       {
         model: Entidad,
         as: 'EntidadPersona',
-        where:{
+        where: {
           status: true,
         },
         include: [
@@ -317,5 +344,6 @@ module.exports = {
   personSuscripcionParienteParams,
   clientParienteSuscripcionParams,
   personWhereClientParams,
-  personUserParams
+  personUserParams,
+  personSuplidorParams,
 };

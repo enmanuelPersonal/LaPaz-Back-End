@@ -17,6 +17,7 @@ const tipoPlandRoute = require('./tipoPlan/route');
 const permisosRoute = require('./permisos/route');
 const categoriaRoute = require('./categoria/route');
 const productoRoute = require('./producto/route');
+const suplidorRoute = require('./suplidor/route');
 
 const router = Router();
 
@@ -37,5 +38,6 @@ router.use('/typePlan', tipoPlandRoute);
 router.use('/permisos', permisosRoute);
 router.use('/categoria', categoriaRoute);
 router.use('/producto', productoRoute);
+router.use('/suplidor', suplidorRoute);
 
 module.exports = router;
