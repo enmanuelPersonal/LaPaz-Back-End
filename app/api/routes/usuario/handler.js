@@ -1,6 +1,8 @@
 const { sequelize } = require('../../../db/config/database');
 const { Usuario, TipoUsuario } = require('../../../db/models/relaciones');
 const { createEntidad } = require('../../helpers/entidad');
+const { getNameDireccion } = require('../../helpers/getNamesDireccion');
+const { personUserParams } = require('../../utils/constant');
 // {
 //   "usuario": "EnmanuelEstrella22",
 //     "password": "12345678",
@@ -82,6 +84,118 @@ module.exports = {
         }
         return res.status(201).send({ data });
       });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+  async getUser(req, res) {
+    const { limit = 10 } = req.query;
+    let parseData = [];
+
+    try {
+      const users = await Usuario.findAll({
+        include: [personUserParams, { model: TipoUsuario, as: 'TipoUsuario' }],
+      });
+
+      if (users.length) {
+        await Promise.all(
+          users.map(async (user) => {
+            let getNameDireccions = {};
+            const {
+              idUsuario,
+              usuario,
+              idEntidad,
+              idTipoUsuario,
+              TipoUsuario: { tipo },
+              EntidadUsuario: {
+                nombre,
+                nacimiento,
+                EntidadTelefono,
+                EntidadDireccion,
+              },
+            } = user;
+
+            const telefonos = EntidadTelefono.map(
+              ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
+                idTelefono,
+                telefono,
+                tipo,
+              })
+            );
+
+            if (EntidadDireccion.length) {
+              getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
+            }
+
+            return parseData.push({
+              idUsuario,
+              usuario,
+              idEntidad,
+              idTipoUsuario,
+              tipo,
+              nombre,
+              nacimiento,
+              telefonos,
+              direcciones: EntidadDireccion,
+              ...getNameDireccions,
+            });
+          })
+        );
+      }
+      if (parseData.length > limit) {
+        parseData = parseData.slice(0, limit + 1);
+      }
+
+      return res.status(201).send({ data: parseData });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+  async updateUser(req, res) {
+    const { idUsuario, usuario, password, idTipoUsuario, idEntidad } = req.body;
+    let data = {};
+
+    try {
+      const userExist = await Usuario.findOne({
+        where: { idUsuario },
+      });
+
+      if (!userExist) {
+        return res.status(409).send({
+          data: userExist,
+          message: 'Este Usuario no existe.',
+        });
+      }
+
+      if (!idTipoUsuario) {
+        return res.status(409).send({
+          data: idTipoUsuario,
+          message: 'El tipo de Usuario debe ser valido.',
+        });
+      }
+
+      data = await Usuario.update(
+        {
+          usuario,
+          password,
+          idEntidad,
+          idTipoUsuario,
+        },
+        { where: { idUsuario }, individualHooks: true }
+      );
+
+      return res.status(201).send({ data });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+  async deleteUser(req, res) {
+    const { idUsuario } = req.body;
+
+    try {
+      await Usuario.destroy({ where: { idUsuario } });
+
+      return res.status(201).send({ data: '1' });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }

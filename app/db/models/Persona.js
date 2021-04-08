@@ -18,6 +18,11 @@ const Persona = sequelize.define(
       allowNull: false,
       type: DataTypes.TEXT,
     },
+    status: {
+      allowNull: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
   },
   {}
 );

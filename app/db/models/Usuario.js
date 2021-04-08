@@ -39,6 +39,14 @@ const Usuario = sequelize.define(
           password: hashedPwd,
         });
       },
+      beforeUpdate: async (user) => {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPwd = await bcrypt.hash(user.password, salt);
+
+        Object.assign(user, {
+          password: hashedPwd,
+        });
+      },
     },
   }
 );

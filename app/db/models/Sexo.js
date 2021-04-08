@@ -17,6 +17,7 @@ const Sexo = sequelize.define(
     sexo: {
       allowNull: false,
       type: DataTypes.TEXT,
+      unique: true,
     },
   },
   {}

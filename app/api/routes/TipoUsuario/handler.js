@@ -15,7 +15,6 @@ module.exports = {
           message: 'Este Tipo de Usuario ya esta registrado.',
         });
       }
-
       const data = await TipoUsuario.create({
         tipo,
       });

@@ -9,12 +9,18 @@ const {
 
 module.exports = {
   async auth(req, res) {
-    const { tipoUsuario, idEntidad, nombre, permisos } = req.authEntity;
+    const {
+      tipoUsuario,
+      idEntidad,
+      idUsuario,
+      nombre,
+      permisos,
+    } = req.authEntity;
 
     try {
-      return res
-        .status(200)
-        .send({ data: { tipoUsuario, idEntidad, nombre, permisos } });
+      return res.status(200).send({
+        data: { tipoUsuario, idUsuario, idEntidad, nombre, permisos },
+      });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -53,6 +59,7 @@ module.exports = {
       const {
         password: hashedPwd = '',
         idEntidad = null,
+        idUsuario = null,
         EntidadUsuario: { nombre = '' },
         TipoUsuario: { tipo, TipoUsuarioPermisos },
       } = getUser || {};
@@ -65,13 +72,14 @@ module.exports = {
         const { cookie, cookieConfig } = cookieCreator({
           tipoUsuario: tipo,
           idEntidad,
+          idUsuario,
           nombre,
           permisos,
         });
 
         res.cookie('LaPaz_auth_token', cookie, cookieConfig);
         return res.status(200).send({
-          data: { tipoUsuario: tipo, idEntidad, nombre, permisos },
+          data: { tipoUsuario: tipo, idUsuario, idEntidad, nombre, permisos },
           login: isCorrectPassword,
           token: cookie,
         });
