@@ -47,6 +47,7 @@ const Pais = require('./Pais'),
   SalidaServicios = require('./SalidaServicios'),
   EntradaServicios = require('./EntradaServicios'),
   HistorialTiempoServicios = require('./HistorialTiempoServicios'),
+  Versiones = require('./Versiones'),
   HistorialSuscripcion = require('./HistorialSuscripcion');
 
 // Calle
@@ -418,8 +419,8 @@ TipoPago.belongsToMany(Compra, {
 });
 
 //DetalleFactura
-DetalleFactura.belongsTo(Factura, {
-  as: 'DetalleFactura',
+Factura.hasMany(DetalleFactura, {
+  as: 'FacturaDetalle',
   foreignKey: 'numFactura',
 });
 
@@ -429,8 +430,9 @@ DetalleFactura.belongsTo(Producto, {
 });
 
 //DetalleCompra
-DetalleCompra.belongsTo(Compra, {
-  as: 'DetalleCompra',
+
+Compra.hasMany(DetalleCompra, {
+  as: 'CompraDetalle',
   foreignKey: 'numCompra',
 });
 
@@ -493,6 +495,15 @@ Vehiculo.belongsTo(Modelo, {
   foreignKey: 'idModelo',
 });
 
+// Compra.sync({
+//   logging: console.log,
+//   force: true,
+// })
+// .then(() => console.log("conectado"))
+// .catch((error) => {
+//   console.error("No se pudo conectar:", error);
+// });
+
 module.exports = {
   Pais,
   Region,
@@ -544,4 +555,5 @@ module.exports = {
   DetalleCompra,
   EntradaServicios,
   SalidaServicios,
+  Versiones
 };

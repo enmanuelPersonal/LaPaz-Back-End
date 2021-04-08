@@ -8,11 +8,14 @@ const Factura = sequelize.define(
   {
     numFactura: {
       allowNull: false,
-      autoIncrement: false,
-      defaultValue: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER,
       unique: true,
+    },
+    total: {
+      allowNull: false,
+      type: DataTypes.DOUBLE,
     },
     NFC: {
       type: DataTypes.TEXT,

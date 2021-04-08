@@ -8,11 +8,14 @@ const Compra = sequelize.define(
   {
     numCompra: {
       allowNull: false,
-      autoIncrement: false,
-      defaultValue: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER,
       unique: true,
+    },
+    total: {
+      allowNull: false,
+      type: DataTypes.DOUBLE,
     },
     status: {
       allowNull: false,
