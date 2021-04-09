@@ -44,7 +44,8 @@ const { getParientes } = require('./getParientes');
 // {
 //   "idClient": "37f33547-b153-4655-a04c-a47aa0c9f49a",
 //   "idTipoPlan": "6c88201e-9c75-467c-acbe-d35855162926",
-//   "monto": 1500
+//   "monto": 1500,
+//   "getIdEntidad": ""
 // }
 
 module.exports = {
@@ -59,6 +60,7 @@ module.exports = {
       monto,
       idUsuario,
       status = 'Proceso',
+      getIdEntidad = '',
     } = req.body;
     let getData = {},
       errorParientes = [];
@@ -84,6 +86,7 @@ module.exports = {
             ...client,
             telefonos,
             direcciones,
+            getIdEntidad,
             transaction,
           });
 

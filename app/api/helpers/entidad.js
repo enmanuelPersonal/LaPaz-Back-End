@@ -11,23 +11,28 @@ module.exports = {
     correos = [],
     direcciones = [],
     statusEntidad = true,
+    getIdEntidad,
     transaction,
   }) {
+    let idEntidad = '';
     try {
-      const newEntidad = await Entidad.create({
-        nombre,
-        nacimiento,
-        status: statusEntidad,
-      });
+      if (getIdEntidad) {
+        const newEntidad = await Entidad.create({
+          nombre,
+          nacimiento,
+          status: statusEntidad,
+        });
 
-      if (!newEntidad) {
-        return {
-          status: false,
-          message: 'Esa entidad ya existe',
-        };
+        if (!newEntidad) {
+          return {
+            status: false,
+            message: 'Esa entidad ya existe',
+          };
+        }
+        idEntidad = newEntidad.idEntidad;
+      } else {
+        idEntidad = getIdEntidad;
       }
-
-      const { idEntidad } = newEntidad;
 
       if (telefonos.length) {
         const telefono = await createTelefono({
