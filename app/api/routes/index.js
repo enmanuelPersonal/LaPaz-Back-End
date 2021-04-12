@@ -19,6 +19,9 @@ const categoriaRoute = require('./categoria/route');
 const productoRoute = require('./producto/route');
 const suplidorRoute = require('./suplidor/route');
 const compraRoute = require('./compra/route');
+const pagosAppRoute = require('./pagosApp/route');
+const ventaRoute = require('./venta/route');
+const versionRoute = require('./version/route');
 
 const router = Router();
 
@@ -41,5 +44,8 @@ router.use('/categoria', categoriaRoute);
 router.use('/producto', productoRoute);
 router.use('/suplidor', suplidorRoute);
 router.use('/compra', compraRoute);
+router.use('/pagosApp', pagosAppRoute);
+router.use('/venta', ventaRoute);
+router.use('/version', versionRoute);
 
 module.exports = router;

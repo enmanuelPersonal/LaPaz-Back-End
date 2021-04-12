@@ -1,10 +1,10 @@
-const { sequelize } = require('../../../db/config/database');
+const { sequelize } = require("../../../db/config/database");
 const {
   Suscripcion,
   TipoPago,
   Mensualidad,
-} = require('../../../db/models/relaciones');
-const { paymentStripe } = require('../../helpers/pagos/pagos');
+} = require("../../../db/models/relaciones");
+const { paymentStripe } = require("../../helpers/pagos/pagos");
 
 // {
 // "idTipoPago": "f0ab9552-411b-4506-8824-42201ac90445",
@@ -23,9 +23,9 @@ module.exports = {
       idSuscripcion,
       meses,
       monto,
-      amount = '',
-      id = '',
-      description = '',
+      amount = "",
+      id = "",
+      description = "",
     } = req.body;
     let getData = {};
 
@@ -38,12 +38,12 @@ module.exports = {
         if (!getTipoPago) {
           return res
             .status(409)
-            .send({ message: 'Esta Tipo de pago no existe' });
+            .send({ message: "Esta Tipo de pago no existe" });
         }
 
         const { tipo } = getTipoPago;
 
-        if (tipo === 'Tarjeta') {
+        if (tipo === "Tarjeta") {
           const { error, mensaje } = await paymentStripe({
             amount,
             id,
@@ -81,6 +81,32 @@ module.exports = {
       return res.status(500).send({ message: error.message });
     }
   },
+  async addMensualidadClient(req, res) {
+    const { idSuscripcion, meses, monto } = req.body;
+    let getData = {};
+
+    try {
+      await sequelize.transaction(async (transaction) => {
+        const getTipoPago = await TipoPago.findOne({
+          where: { tipo: "Tarjeta" },
+        });
+
+        getData = await Mensualidad.create(
+          {
+            meses,
+            idSuscripcion,
+            idTipoPago: getTipoPago.idTipoPago,
+            monto,
+          },
+          { transaction }
+        );
+
+        return res.status(201).send({ data: getData });
+      });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
   async getMensualidades(req, res) {
     const { limit = 10 } = req.query;
     let parseData = [];
@@ -90,7 +116,7 @@ module.exports = {
         //   clientSuscripcionParams,
         //   { model: TipoPlan, as: 'SuscripcionTipoPlan' },
         // ],
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
       });
       // if (suscripciones.length) {
       //   parseData = suscripciones.map((suscripcion) => {
@@ -146,7 +172,7 @@ module.exports = {
       if (parseData.length > limit) {
         parseData = parseData.slice(0, limit + 1);
       }
-      
+
       return res.status(200).send({ data: mensualidades });
     } catch (error) {
       return res.status(500).send({ message: error.message });

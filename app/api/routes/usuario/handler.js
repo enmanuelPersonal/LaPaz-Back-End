@@ -25,6 +25,8 @@ module.exports = {
       telefonos = [],
       correos = [],
       direcciones = [],
+      getIdEntidad = "",
+      statusEntidad = false,
     } = req.body;
     let data = {},
       getIdTipoUsuario;
@@ -65,6 +67,8 @@ module.exports = {
             telefonos,
             correos,
             direcciones,
+            statusEntidad,
+            getIdEntidad,
             transaction,
           });
 

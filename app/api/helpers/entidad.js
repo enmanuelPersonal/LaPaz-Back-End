@@ -1,7 +1,7 @@
-const { Entidad } = require('../../db/models/relaciones');
-const { createCorreo, updateCorreo } = require('./correo');
-const { createDireccion, updateDireccion } = require('./direccion/direccion');
-const { createTelefono, updateTelefono } = require('./telefono');
+const { Entidad } = require("../../db/models/relaciones");
+const { createCorreo, updateCorreo } = require("./correo");
+const { createDireccion, updateDireccion } = require("./direccion/direccion");
+const { createTelefono, updateTelefono } = require("./telefono");
 
 module.exports = {
   async createEntidad({
@@ -14,10 +14,11 @@ module.exports = {
     getIdEntidad,
     transaction,
   }) {
-    let idEntidad = '';
+    let idEntidad = "",
+      newEntidad = {};
     try {
-      if (getIdEntidad) {
-        const newEntidad = await Entidad.create({
+      if (!getIdEntidad) {
+        newEntidad = await Entidad.create({
           nombre,
           nacimiento,
           status: statusEntidad,
@@ -26,12 +27,15 @@ module.exports = {
         if (!newEntidad) {
           return {
             status: false,
-            message: 'Esa entidad ya existe',
+            message: "Esa entidad ya existe",
           };
         }
         idEntidad = newEntidad.idEntidad;
       } else {
         idEntidad = getIdEntidad;
+        newEntidad = await Entidad.findOne({
+          where: { idEntidad },
+        });
       }
 
       if (telefonos.length) {
@@ -44,7 +48,7 @@ module.exports = {
         if (!telefono) {
           return {
             status: false,
-            message: 'Telefonos incorrectos',
+            message: "Telefonos incorrectos",
           };
         }
       }
@@ -54,7 +58,7 @@ module.exports = {
         if (!correo) {
           return {
             status: false,
-            message: 'Correos incorrectos',
+            message: "Correos incorrectos",
           };
         }
       }
@@ -67,7 +71,7 @@ module.exports = {
         if (!direccionesIds) {
           return {
             status: false,
-            message: 'Direcciones incorrectas',
+            message: "Direcciones incorrectas",
           };
         }
         await newEntidad.setEntidadDireccion(direccionesIds);
@@ -80,7 +84,7 @@ module.exports = {
     } catch (error) {
       return {
         status: false,
-        message: 'No se pudo crear la Entidad',
+        message: "No se pudo crear la Entidad",
       };
     }
   },
@@ -108,7 +112,7 @@ module.exports = {
       if (!updateEntidad) {
         return {
           status: false,
-          message: 'Esa entidad no existe',
+          message: "Esa entidad no existe",
         };
       }
 
@@ -121,7 +125,7 @@ module.exports = {
         if (!telefono) {
           return {
             status: false,
-            message: 'Telefonos incorrectos',
+            message: "Telefonos incorrectos",
           };
         }
       }
@@ -132,7 +136,7 @@ module.exports = {
         if (!correo) {
           return {
             status: false,
-            message: 'Correos incorrectos',
+            message: "Correos incorrectos",
           };
         }
       }
@@ -145,7 +149,7 @@ module.exports = {
         if (!direccionesIds) {
           return {
             status: false,
-            message: 'Direcciones incorrectas',
+            message: "Direcciones incorrectas",
           };
         }
         await getEntidad.setEntidadDireccion(direccionesIds);
@@ -158,7 +162,7 @@ module.exports = {
     } catch (error) {
       return {
         status: false,
-        message: 'No se pudo actualizar la Entidad',
+        message: "No se pudo actualizar la Entidad",
       };
     }
   },
