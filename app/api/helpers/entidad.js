@@ -11,7 +11,7 @@ module.exports = {
     correos = [],
     direcciones = [],
     statusEntidad = true,
-    getIdEntidad,
+    getIdEntidad = "",
     transaction,
   }) {
     let idEntidad = "",
