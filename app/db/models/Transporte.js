@@ -20,8 +20,8 @@ const Transporte = sequelize.define(
     },
     status: {
       allowNull: false,
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      type: DataTypes.TEXT,
+      defaultValue: 'Proceso',
     },
   },
   {}

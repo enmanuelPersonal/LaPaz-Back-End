@@ -8,19 +8,46 @@ const {
   DetalleFactura,
   Itebis,
   Persona,
-} = require("../../../db/models/relaciones");
+  SalidaServicios,
+  Transporte,
+} = require('../../../db/models/relaciones');
+const { createDireccion } = require('../../helpers/direccion/direccion');
 
 // {
-//   "idCliente": "sdssdwewedcd",
-//     "detalle": [{numCompra: "we233", idProducto: "wedw232", cantidad: 12, precio: 200}],
-//     "tipoPagos":["2c961280-b2b5-4188-aa01-8e47a524c362"],
-//     "total": 200,
-//     "idItebit": "2wedfgq3werdfwesd"
+//   "idCliente": "e9b53c62-5363-4efd-9fe6-a5efe9b61405",
+//   "NFC": "12dwewew",
+//     "detalle": [{idProducto: "8b7d06be-683d-452b-8e23-42bb1b501e2a", cantidad: 1, precio: 2100},{idProducto: "019345c6-a806-499a-b37c-6ab81d622d4d", cantidad: 1, precio: 1575},{idProducto: "2ce40658-cd30-4a48-b969-9a0709775a5d", cantidad: 1 }],
+//     "tipoPagos":["452b17d9-415d-4c26-a306-e796c6740688"],
+//     "total": 20000,
+//     "idItebit": "4aa9b55b-ef67-4c01-a1a9-084ad7bade7c",
+// Para el transporte
+//   "idEmpleado": "5bdce8b9-89ea-4f0b-b9a0-b0694e0f77ed",
+//   "idVehiculo": "552a462d-3d86-4a8c-a974-b0ef03ba2324",
+//   "idDireccion": "9f6bf19c-4389-4518-8fba-19f6204e6edd",
+//   "hora": "sdssdwewedcd",
+//   "isEnvio": false,
+// Crear direccion
+//   "direcciones" : [{"pais": "Republica Dominicana", "region":"Norte", "ciudad": "Santiago", "municipio":"Punal", "sector": "Laguna Prieta", "calle":"Los estrellas", "casa":"16", "referencia": "frente a la banca"}]
 // }
 module.exports = {
   async addVenta(req, res) {
-    const { idCliente, detalle, total, tipoPagos, idItebis } = req.body;
+    const {
+      idCliente,
+      detalle,
+      total,
+      NFC,
+      tipoPagos,
+      idItebis,
+      idEmpleado,
+      idVehiculo,
+      idDireccion = '',
+      direcciones = [],
+      hora,
+      isEnvio = true,
+    } = req.body;
     let data = {};
+    let getIdDireccion = idDireccion;
+    let getDate = new Date();
 
     try {
       const clientExist = await Cliente.findOne({
@@ -30,28 +57,28 @@ module.exports = {
       if (!clientExist) {
         return res.status(409).send({
           data: clientExist,
-          message: "Este Cliente no existe.",
+          message: 'Este Cliente no existe.',
         });
       }
 
       if (!detalle.length) {
         return res.status(409).send({
           data: [],
-          message: "Debe tener productos seleccionados.",
+          message: 'Debe tener productos seleccionados.',
         });
       }
 
       if (!tipoPagos.length) {
         return res.status(409).send({
           data: [],
-          message: "Debe tener un tipo de pago.",
+          message: 'Debe tener un tipo de pago.',
         });
       }
 
       data = await Factura.create({
         idCliente,
         total,
-        NFC: "eewwewewe",
+        NFC,
         idItebis,
       });
 
@@ -62,7 +89,7 @@ module.exports = {
       }
 
       await Promise.all(
-        detalle.map(async ({ idProducto, cantidad, precio }) => {
+        detalle.map(async ({ idProducto, cantidad, precio = 0 }) => {
           await DetalleFactura.create({
             numFactura,
             idProducto,
@@ -79,30 +106,64 @@ module.exports = {
               include: [
                 {
                   model: TipoProducto,
-                  as: "ProductoTipo",
-                  where: { tipo: "producto" },
+                  as: 'ProductoTipo',
+                  where: { tipo: 'producto' },
                 },
               ],
               where: { idProducto },
             });
 
-            if (productos) {
-              await ProductoLog.update(
-                {
-                  stock: stock - cantidad,
-                },
-                { where: { idProducto } }
-              );
+            await ProductoLog.update(
+              {
+                stock: stock - cantidad,
+              },
+              { where: { idProducto } }
+            );
+            if (!productos) {
+              await SalidaServicios.create({
+                numFactura,
+                idProducto,
+                cantidad,
+              });
             }
           }
         })
       );
+
+      if (isEnvio) {
+        if (!idDireccion && direcciones.length) {
+          const direccionesIds = await createDireccion({
+            direcciones,
+          });
+
+          if (!direccionesIds) {
+            return {
+              status: false,
+              message: 'Direcciones incorrectas',
+            };
+          }
+          getIdDireccion = direccionesIds[0];
+        }
+
+        await Transporte.create({
+          numFactura,
+          idEmpleado,
+          idVehiculo,
+          idDireccion: getIdDireccion,
+          hora: `${getDate.getHours()}:${getDate.getMinutes()}:${getDate.getSeconds()}`,
+        });
+      }
 
       return res.status(201).send({ data });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
   },
+  // {
+  //   "idEntidad": "sdssdwewedcd",
+  //     "detalle": [{numCompra: "we233", idProducto: "wedw232", cantidad: 12, precio: 200}],
+  //     "total": 200,
+  // }
   async addVentaByIdEntidad(req, res) {
     const { idEntidad, detalle, total } = req.body;
     let data = {};
@@ -119,12 +180,12 @@ module.exports = {
       if (!detalle.length) {
         return res.status(409).send({
           data: [],
-          message: "Debe tener productos seleccionados.",
+          message: 'Debe tener productos seleccionados.',
         });
       }
 
       const getTipoPago = await TipoPago.findOne({
-        where: { tipo: "Tarjeta" },
+        where: { tipo: 'Tarjeta' },
       });
 
       const getItebit = await Itebis.findOne({
@@ -134,7 +195,7 @@ module.exports = {
       data = await Factura.create({
         idCliente,
         total,
-        NFC: "eewwewewe",
+        NFC: 'eewwewewe',
         idItebis: getItebit.idItebis,
       });
 
@@ -162,8 +223,8 @@ module.exports = {
               include: [
                 {
                   model: TipoProducto,
-                  as: "ProductoTipo",
-                  where: { tipo: "producto" },
+                  as: 'ProductoTipo',
+                  where: { tipo: 'producto' },
                 },
               ],
               where: { idProducto },
@@ -202,8 +263,8 @@ module.exports = {
           // },
           {
             model: DetalleFactura,
-            as: "FacturaDetalle",
-            include: [{ model: Producto, as: "DetalleFacturaProducto" }],
+            as: 'FacturaDetalle',
+            include: [{ model: Producto, as: 'DetalleFacturaProducto' }],
           },
         ],
       });
@@ -279,8 +340,8 @@ module.exports = {
         include: [
           {
             model: DetalleFactura,
-            as: "FacturaDetalle",
-            include: [{ model: Producto, as: "DetalleFacturaProducto" }],
+            as: 'FacturaDetalle',
+            include: [{ model: Producto, as: 'DetalleFacturaProducto' }],
           },
         ],
         where: { idCliente },
@@ -316,53 +377,59 @@ module.exports = {
       return res.status(500).send({ message: error.message });
     }
   },
-  // async updateUser(req, res) {
-  //   const { idUsuario, usuario, password, idTipoUsuario, idEntidad } = req.body;
-  //   let data = {};
+  async updateVenta(req, res) {
+    const {
+      numFactura,
+      status = true,
+      statusTransporte = 'Proceso',
+      isEnvio = true,
+    } = req.body;
 
-  //   try {
-  //     const userExist = await Usuario.findOne({
-  //       where: { idUsuario },
-  //     });
+    try {
+      await Factura.update(
+        {
+          status,
+        },
+        { where: { numFactura } }
+      );
 
-  //     if (!userExist) {
-  //       return res.status(409).send({
-  //         data: userExist,
-  //         message: 'Este Usuario no existe.',
-  //       });
-  //     }
+      if (isEnvio) {
+        await Transporte.update(
+          {
+            status: statusTransporte,
+          },
+          { where: { numFactura } }
+        );
+      }
 
-  //     if (!idTipoUsuario) {
-  //       return res.status(409).send({
-  //         data: idTipoUsuario,
-  //         message: 'El tipo de Usuario debe ser valido.',
-  //       });
-  //     }
+      return res.status(201).send({ data: true });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+  async deleteVenta(req, res) {
+    const { numFactura, isEnvio = true } = req.body;
 
-  //     data = await Usuario.update(
-  //       {
-  //         usuario,
-  //         password,
-  //         idEntidad,
-  //         idTipoUsuario,
-  //       },
-  //       { where: { idUsuario }, individualHooks: true }
-  //     );
+    try {
+      await Factura.update(
+        {
+          status: false,
+        },
+        { where: { numFactura } }
+      );
 
-  //     return res.status(201).send({ data });
-  //   } catch (error) {
-  //     return res.status(500).send({ message: error.message });
-  //   }
-  // },
-  // async deleteUser(req, res) {
-  //   const { idUsuario } = req.body;
+      if (isEnvio) {
+        await Transporte.update(
+          {
+            status: 'Cancelada',
+          },
+          { where: { numFactura } }
+        );
+      }
 
-  //   try {
-  //     await Usuario.destroy({ where: { idUsuario } });
-
-  //     return res.status(201).send({ data: '1' });
-  //   } catch (error) {
-  //     return res.status(500).send({ message: error.message });
-  //   }
-  // },
+      return res.status(201).send({ data: true });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
 };

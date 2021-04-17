@@ -22,6 +22,11 @@ const compraRoute = require('./compra/route');
 const pagosAppRoute = require('./pagosApp/route');
 const ventaRoute = require('./venta/route');
 const versionRoute = require('./version/route');
+const planRoute = require('./plan/route');
+const almacenRoute = require('./almacen/route');
+const inventarioRoute = require('./inventario/route');
+const vehiculoRoute = require('./vehiculo/route');
+const itebisRoute = require('./itebis/route');
 
 const router = Router();
 
@@ -47,5 +52,10 @@ router.use('/compra', compraRoute);
 router.use('/pagosApp', pagosAppRoute);
 router.use('/venta', ventaRoute);
 router.use('/version', versionRoute);
+router.use('/plan', planRoute);
+router.use('/almacen', almacenRoute);
+router.use('/inventario', inventarioRoute);
+router.use('/vehiculo', vehiculoRoute);
+router.use('/itebis', itebisRoute);
 
 module.exports = router;

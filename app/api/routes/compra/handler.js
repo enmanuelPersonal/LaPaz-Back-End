@@ -7,6 +7,7 @@ const {
   DetalleCompra,
   Producto,
   ProductoLog,
+  TipoPago,
 } = require('../../../db/models/relaciones');
 const { findOrCreate } = require('../../helpers/productoSuplidor');
 const {
@@ -21,7 +22,7 @@ const {
 // }
 module.exports = {
   async addCompra(req, res) {
-    const { idSuplidor, detalle, total, tipoPagos } = req.body;
+    const { idSuplidor, detalle, total } = req.body;
     let data = {};
 
     try {
@@ -43,12 +44,16 @@ module.exports = {
         });
       }
 
-      if (!tipoPagos.length) {
-        return res.status(409).send({
-          data: [],
-          message: 'Debe tener un tipo de pago.',
-        });
-      }
+      // if (!tipoPagos.length) {
+      //   return res.status(409).send({
+      //     data: [],
+      //     message: 'Debe tener un tipo de pago.',
+      //   });
+      // }
+
+      const { idTipoPago } = await TipoPago.findOne({
+        where: { tipo: 'Efectivo' },
+      });
 
       data = await Compra.create({
         idSuplidor,
@@ -57,8 +62,8 @@ module.exports = {
 
       const { numCompra } = data;
 
-      if (tipoPagos.length) {
-        await data.setCompraTipoPago(tipoPagos);
+      if (idTipoPago) {
+        await data.setCompraTipoPago([idTipoPago]);
       }
 
       await Promise.all(

@@ -8,7 +8,7 @@ router.get('/', handler.getVenta);
 router.get('/:idEntidad', handler.getVentaByCliente);
 router.post('/add', handler.addVenta);
 router.post('/', handler.addVentaByIdEntidad);
-// router.put('/', handler.updateUser);
-// router.delete('/', handler.deleteUser);
+router.put('/', handler.updateVenta);
+router.delete('/', handler.deleteVenta);
 
 module.exports = router;
