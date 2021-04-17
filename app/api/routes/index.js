@@ -27,6 +27,7 @@ const almacenRoute = require('./almacen/route');
 const inventarioRoute = require('./inventario/route');
 const vehiculoRoute = require('./vehiculo/route');
 const itebisRoute = require('./itebis/route');
+const unidadMedidaRoute = require('./UnidadMedida/route');
 
 const router = Router();
 
@@ -57,5 +58,6 @@ router.use('/almacen', almacenRoute);
 router.use('/inventario', inventarioRoute);
 router.use('/vehiculo', vehiculoRoute);
 router.use('/itebis', itebisRoute);
+router.use('/unidadMedida', unidadMedidaRoute);
 
 module.exports = router;

@@ -77,6 +77,7 @@ module.exports = {
             id,
             cantidad,
             idUnidadMedida,
+            ArmarUnidadMedida: { descripcion: unidadDescripcion },
             idProducto,
             ArmarProducto: {
               nombre,
@@ -93,6 +94,7 @@ module.exports = {
             descripcion,
             tipo,
             categoria,
+            unidadMedida: unidadDescripcion,
           })
         );
       }
