@@ -42,7 +42,6 @@ module.exports = {
       idVehiculo,
       idDireccion = '',
       direcciones = [],
-      hora,
       isEnvio = true,
     } = req.body;
     let data = {};

@@ -5,6 +5,7 @@ const {
   UnidadMedida,
   Categoria,
   TipoProducto,
+  ProductoLog,
 } = require('../../../db/models/relaciones');
 // {
 //   "idTipoPlan": "sa96629b0-50d7-41b6-966c-abc2fa464466",
@@ -72,29 +73,46 @@ module.exports = {
       });
 
       if (data.length) {
-        getData = data.map(
-          ({
-            id,
-            cantidad,
-            idUnidadMedida,
-            ArmarUnidadMedida: { descripcion: unidadDescripcion },
-            idProducto,
-            ArmarProducto: {
+        await Promise.all(
+          await data.map(async (producto) => {
+            const {
+              id,
+              cantidad,
+              idUnidadMedida,
+              ArmarUnidadMedida: { descripcion: unidadDescripcion },
+              idProducto,
+              ArmarProducto: {
+                nombre,
+                descripcion,
+                ProductoTipo: { tipo },
+                ProductoCategoria: { categoria },
+              },
+            } = producto;
+
+            let getLog = {};
+
+            getLog = await ProductoLog.findOne({
+              where: { idProducto },
+            });
+
+            if (getLog) {
+              const { idProductoLog, stock, costo, precio, reorden } = getLog;
+
+              parseGetLog = { idProductoLog, stock, costo, precio, reorden };
+            }
+
+            return getData.push({
+              id,
+              cantidad,
+              idUnidadMedida,
+              idProducto,
               nombre,
               descripcion,
-              ProductoTipo: { tipo },
-              ProductoCategoria: { categoria },
-            },
-          }) => ({
-            id,
-            cantidad,
-            idUnidadMedida,
-            idProducto,
-            nombre,
-            descripcion,
-            tipo,
-            categoria,
-            unidadMedida: unidadDescripcion,
+              tipo,
+              categoria,
+              unidadMedida: unidadDescripcion,
+              log: parseGetLog,
+            });
           })
         );
       }

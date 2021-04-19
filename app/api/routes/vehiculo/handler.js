@@ -1,4 +1,4 @@
-const { TipoPlan, Vehiculo } = require('../../../db/models/relaciones');
+const { Modelo, Vehiculo, Marca } = require('../../../db/models/relaciones');
 
 module.exports = {
   async addVehiculo(req, res) {
@@ -16,10 +16,32 @@ module.exports = {
     }
   },
   async getAllVehiculo(req, res) {
+    let parseData = [];
     try {
-      const data = await Vehiculo.findAll();
+      const data = await Vehiculo.findAll({
+        include: [
+          { model: Marca, as: 'VehiculoMarca' },
+          { model: Modelo, as: 'VehiculoModelo' },
+        ],
+      });
 
-      return res.status(201).send({ data });
+      if (data.length) {
+        parseData = data.map(
+          ({
+            idVehiculo,
+            status,
+            VehiculoMarca: { marca },
+            VehiculoModelo: { modelo },
+          }) => ({
+            idVehiculo,
+            status,
+            marca,
+            modelo,
+          })
+        );
+      }
+
+      return res.status(201).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }

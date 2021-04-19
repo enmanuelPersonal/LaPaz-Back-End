@@ -5,6 +5,7 @@ const handler = require('./handler');
 const router = Router();
 
 router.get('/', handler.getProductos);
+router.get('/all', handler.getAllProductos);
 router.get('/categoria', handler.getProductosByCategorias);
 router.get('/type', handler.getTypeProducto);
 router.get('/categorias', handler.getCategoria);
