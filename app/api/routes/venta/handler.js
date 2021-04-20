@@ -10,6 +10,7 @@ const {
   Persona,
   SalidaServicios,
   Transporte,
+  Entidad,
 } = require('../../../db/models/relaciones');
 const { createDireccion } = require('../../helpers/direccion/direccion');
 
@@ -251,15 +252,26 @@ module.exports = {
     let parseData = [];
 
     try {
-      const compra = await Factura.findAll({
+      const factura = await Factura.findAll({
         include: [
-          // {
-          //   model: Suplidor,
-          //   as: "CompraSuplidor",
-          //   // include:[
-          //   //   personSuplidorParams
-          //   // ]
-          // },
+          {
+            model: Cliente,
+            as: 'FacturaCliente',
+            include: [
+              {
+                model: Persona,
+                as: 'ClientePersona',
+
+                include: [
+                  {
+                    model: Entidad,
+                    as: 'EntidadPersona',
+                    where: { status: true },
+                  },
+                ],
+              },
+            ],
+          },
           {
             model: DetalleFactura,
             as: 'FacturaDetalle',
@@ -268,55 +280,51 @@ module.exports = {
         ],
       });
 
-      // if (compra.length) {
-      //     compra.map( (comp) => {
-      //       let getNameDireccions = {};
-      //       const {
-      //         numCompra,
-      //         total,
-      //         status,
-      //         createdAt,
-      //         TipoUsuario: { tipo },
-      //         EntidadUsuario: {
-      //           nombre,
-      //           nacimiento,
-      //           EntidadTelefono,
-      //           EntidadDireccion,
-      //         },
-      //       } = comp;
+      if (factura.length) {
+        factura.map((comp) => {
+          const {
+            numFactura,
+            total,
+            status,
+            createdAt,
+            FacturaCliente: {
+              ClientePersona: {
+                apellido,
+                EntidadPersona: { nombre },
+              },
+            },
+            FacturaDetalle,
+          } = comp;
 
-      //       const telefonos = EntidadTelefono.map(
-      //         ({ idTelefono, telefono, TipoTele: { tipo } }) => ({
-      //           idTelefono,
-      //           telefono,
-      //           tipo,
-      //         })
-      //       );
+          const getDetalle = FacturaDetalle.map(
+            ({
+              cantidad,
+              precio,
+              DetalleFacturaProducto: { nombre, descripcion },
+            }) => ({
+              cantidad,
+              precio,
+              nombre,
+              descripcion,
+            })
+          );
 
-      //       if (EntidadDireccion.length) {
-      //         getNameDireccions = await getNameDireccion(EntidadDireccion[0]);
-      //       }
-
-      //       return parseData.push({
-      //         idUsuario,
-      //         usuario,
-      //         idEntidad,
-      //         idTipoUsuario,
-      //         tipo,
-      //         nombre,
-      //         nacimiento,
-      //         telefonos,
-      //         direcciones: EntidadDireccion,
-      //         ...getNameDireccions,
-      //       });
-      //     })
-
-      // }
+          return parseData.push({
+            numFactura,
+            total,
+            status,
+            createdAt,
+            apellido,
+            nombre,
+            detalle: getDetalle,
+          });
+        });
+      }
       // if (parseData.length > limit) {
       //   parseData = parseData.slice(0, limit + 1);
       // }
 
-      return res.status(201).send({ data: compra });
+      return res.status(201).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -367,9 +375,9 @@ module.exports = {
           });
         });
       }
-      if (parseData.length > limit) {
-        parseData = parseData.slice(0, limit + 1);
-      }
+      // if (parseData.length > limit) {
+      //   parseData = parseData.slice(0, limit + 1);
+      // }
 
       return res.status(201).send({ data: parseData });
     } catch (error) {
