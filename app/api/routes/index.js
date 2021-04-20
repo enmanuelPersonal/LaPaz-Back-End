@@ -19,6 +19,16 @@ const categoriaRoute = require('./categoria/route');
 const productoRoute = require('./producto/route');
 const suplidorRoute = require('./suplidor/route');
 const compraRoute = require('./compra/route');
+const pagosAppRoute = require('./pagosApp/route');
+const ventaRoute = require('./venta/route');
+const versionRoute = require('./version/route');
+const planRoute = require('./plan/route');
+const almacenRoute = require('./almacen/route');
+const inventarioRoute = require('./inventario/route');
+const vehiculoRoute = require('./vehiculo/route');
+const itebisRoute = require('./itebis/route');
+const unidadMedidaRoute = require('./UnidadMedida/route');
+const metodoPagoRoute = require('./metodoPago/route');
 
 const router = Router();
 
@@ -41,5 +51,15 @@ router.use('/categoria', categoriaRoute);
 router.use('/producto', productoRoute);
 router.use('/suplidor', suplidorRoute);
 router.use('/compra', compraRoute);
+router.use('/pagosApp', pagosAppRoute);
+router.use('/venta', ventaRoute);
+router.use('/version', versionRoute);
+router.use('/plan', planRoute);
+router.use('/almacen', almacenRoute);
+router.use('/inventario', inventarioRoute);
+router.use('/vehiculo', vehiculoRoute);
+router.use('/itebis', itebisRoute);
+router.use('/unidadMedida', unidadMedidaRoute);
+router.use('/typePago', metodoPagoRoute);
 
 module.exports = router;

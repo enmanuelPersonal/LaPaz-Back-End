@@ -82,6 +82,7 @@ module.exports = {
               idDifunto,
               idCliente,
               idPersona,
+              updatedAt,
               DifuntoPersona: {
                 apellido,
                 status: personStatus,
@@ -127,6 +128,7 @@ module.exports = {
               appellidoCliente,
               personStatus,
               entidadStatus,
+              updatedAt,
               correos: EntidadCorreo,
               telefonos,
               direcciones: EntidadDireccion,

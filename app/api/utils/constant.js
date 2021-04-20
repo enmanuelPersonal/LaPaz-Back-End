@@ -219,6 +219,30 @@ const clientSuscripcionParams = {
   ],
 };
 
+const clientMensualidadParams = {
+  model: Cliente,
+  as: 'SuscripcionCliente',
+  attributes: ['idCliente'],
+  include: [
+    {
+      model: Identidad,
+      as: 'ClienteIdentidad',
+    },
+    {
+      model: Persona,
+      as: 'ClientePersona',
+      include: [
+        {
+          model: Entidad,
+          as: 'EntidadPersona',
+          // where: { status: true },
+        },
+        { model: Sexo, as: 'SexoPersona', attributes: ['sexo'] },
+      ],
+    },
+  ],
+};
+
 const clientParienteSuscripcionParams = {
   model: Cliente,
   as: 'ParienteCliente',
@@ -346,4 +370,5 @@ module.exports = {
   personWhereClientParams,
   personUserParams,
   personSuplidorParams,
+  clientMensualidadParams,
 };

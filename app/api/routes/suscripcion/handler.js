@@ -1,14 +1,16 @@
-const { sequelize } = require('../../../db/config/database');
+const { sequelize } = require("../../../db/config/database");
 const {
   Suscripcion,
   TipoPlan,
   HistorialSuscripcion,
   Entidad,
-} = require('../../../db/models/relaciones');
-const { createCliente } = require('../../helpers/cliente');
-const { createPariente } = require('../../helpers/pariente');
-const { clientSuscripcionParams } = require('../../utils/constant');
-const { getParientes } = require('./getParientes');
+  Cliente,
+  Persona,
+} = require("../../../db/models/relaciones");
+const { createCliente } = require("../../helpers/cliente");
+const { createPariente } = require("../../helpers/pariente");
+const { clientSuscripcionParams } = require("../../utils/constant");
+const { getParientes } = require("./getParientes");
 
 // {
 //   "client": {
@@ -44,7 +46,8 @@ const { getParientes } = require('./getParientes');
 // {
 //   "idClient": "37f33547-b153-4655-a04c-a47aa0c9f49a",
 //   "idTipoPlan": "6c88201e-9c75-467c-acbe-d35855162926",
-//   "monto": 1500
+//   "monto": 1500,
+//   "getIdEntidad": ""
 // }
 
 module.exports = {
@@ -52,13 +55,14 @@ module.exports = {
     const {
       client,
       parientes = [],
-      idClient = '',
+      idClient = "",
       direcciones = [],
       telefonos = [],
       idTipoPlan,
       monto,
       idUsuario,
-      status = 'Proceso',
+      status = "Proceso",
+      getIdEntidad = "",
     } = req.body;
     let getData = {},
       errorParientes = [];
@@ -84,20 +88,19 @@ module.exports = {
             ...client,
             telefonos,
             direcciones,
+            getIdEntidad,
             transaction,
           });
 
           if (error) {
             return res.status(409).send(message);
           }
-
           const { idCliente } = data;
 
           if (parientes.length) {
             await Promise.all(
               await parientes.map(async (pariente, i) => {
                 const getTelefono = pariente.telefonos || telefonos;
-
                 const { error, message } = await createPariente({
                   ...pariente,
                   telefonos: getTelefono,
@@ -146,9 +149,9 @@ module.exports = {
       const suscripciones = await Suscripcion.findAll({
         include: [
           clientSuscripcionParams,
-          { model: TipoPlan, as: 'SuscripcionTipoPlan' },
+          { model: TipoPlan, as: "SuscripcionTipoPlan" },
         ],
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
       });
 
       if (suscripciones.length) {
@@ -229,10 +232,10 @@ module.exports = {
       const suscripciones = await Suscripcion.findAll({
         include: [
           clientSuscripcionParams,
-          { model: TipoPlan, as: 'SuscripcionTipoPlan' },
+          { model: TipoPlan, as: "SuscripcionTipoPlan" },
         ],
         where: { idCliente },
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
       });
       if (suscripciones.length) {
         parseData = suscripciones.map((suscripcion) => {
@@ -290,6 +293,74 @@ module.exports = {
       return res.status(500).send({ message: error.message });
     }
   },
+  async getSuscripcionByIdEntidad(req, res) {
+    const { idEntidad } = req.params;
+    let parseData = [];
+
+    try {
+      const { idPersona } = await Persona.findOne({
+        where: { idEntidad },
+      });
+      const { idCliente } = await Cliente.findOne({
+        where: { idPersona },
+      });
+
+      const suscripciones = await Suscripcion.findAll({
+        include: [
+          clientSuscripcionParams,
+          { model: TipoPlan, as: "SuscripcionTipoPlan" },
+        ],
+        where: { idCliente },
+        order: [["updatedAt", "DESC"]],
+      });
+      if (suscripciones.length) {
+        parseData = suscripciones.map((suscripcion) => {
+          if (!suscripcion.SuscripcionCliente.ClientePersona) {
+            return;
+          }
+
+          const {
+            status: statusSuscripcion,
+            createdAt: fecha,
+            idSuscripcion,
+            SuscripcionCliente: {
+              ClientePersona: {
+                apellido,
+                EntidadPersona: { nombre, nacimiento },
+              },
+              ClienteIdentidad: {
+                serie,
+                TipoIdentidad: { tipo: tipoIdentidad },
+              },
+            },
+            SuscripcionTipoPlan: { tipo, monto: cuotas },
+          } = suscripcion;
+
+          return {
+            idSuscripcion,
+            statusSuscripcion,
+            fecha,
+            apellido,
+            nombre,
+            nacimiento,
+            tipoPlan: tipo,
+            cuotas,
+            identidades: { identidad: serie, tipo: tipoIdentidad },
+          };
+        });
+      }
+
+      if (parseData.length) {
+        parseData = { ...parseData[0] };
+      } else {
+        parseData = null;
+      }
+
+      return res.status(200).send({ data: parseData });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
   // {
   //   "idCliente": "73cf1508-1a00-4d33-bb25-3b0af1864186",
   //   "idSuscripcion": "60e3102b-bc12-40fd-b4a5-6c4e71a132e1",
@@ -306,9 +377,9 @@ module.exports = {
       idTipoPlan,
       monto,
       idUsuario,
-      status = 'Proceso',
+      status = "Proceso",
       idParientes = [],
-      idClienteEntidad = '',
+      idClienteEntidad = "",
     } = req.body;
     let data = {};
 
@@ -318,10 +389,10 @@ module.exports = {
       });
 
       if (!getSuscripcion) {
-        return res.status(409).send({ message: 'Esta Suscripcion no existe' });
+        return res.status(409).send({ message: "Esta Suscripcion no existe" });
       }
 
-      if (status === 'Aceptada') {
+      if (status === "Aceptada") {
         await Entidad.update(
           {
             status: true,
@@ -387,8 +458,8 @@ module.exports = {
     const {
       idSuscripcion,
       idParientes = [],
-      idClienteEntidad = '',
-      idUsuario = '',
+      idClienteEntidad = "",
+      idUsuario = "",
     } = req.body;
     let data = {};
 
@@ -398,7 +469,7 @@ module.exports = {
       });
 
       if (!getSuscripcion) {
-        return res.status(409).send({ message: 'Esta Suscripcion no existe' });
+        return res.status(409).send({ message: "Esta Suscripcion no existe" });
       }
 
       await Entidad.update(
@@ -422,7 +493,7 @@ module.exports = {
 
       data = await Suscripcion.update(
         {
-          status: 'Cancelada',
+          status: "Cancelada",
         },
         { where: { idSuscripcion } }
       );

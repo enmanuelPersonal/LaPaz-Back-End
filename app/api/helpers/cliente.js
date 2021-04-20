@@ -14,6 +14,7 @@ module.exports = {
     correos,
     direcciones,
     statusEntidad = false,
+    getIdEntidad = '',
     transaction,
   }) {
     let data = {};
@@ -49,6 +50,7 @@ module.exports = {
           apellido,
           sexo,
           statusEntidad,
+          getIdEntidad,
           transaction,
         });
         if (!status) {
