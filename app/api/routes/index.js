@@ -29,6 +29,7 @@ const vehiculoRoute = require('./vehiculo/route');
 const itebisRoute = require('./itebis/route');
 const unidadMedidaRoute = require('./UnidadMedida/route');
 const metodoPagoRoute = require('./metodoPago/route');
+const dasboardRoute = require('./dasboard/route');
 
 const router = Router();
 
@@ -61,5 +62,6 @@ router.use('/vehiculo', vehiculoRoute);
 router.use('/itebis', itebisRoute);
 router.use('/unidadMedida', unidadMedidaRoute);
 router.use('/typePago', metodoPagoRoute);
+router.use('/dasboard', dasboardRoute);
 
 module.exports = router;
