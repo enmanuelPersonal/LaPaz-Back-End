@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node app/index.js",
     "dev": "nodemon app/index.js",
+    "seeders": "node app/db/seeders/index.js",
     "migrate": "npx sequelize-cli db:migrate",
     "seed": "npx sequelize-cli db:seed:all"
   },
@@ -18,10 +19,15 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "fs-extra": "^9.1.0",
     "helmet": "^4.4.1",
     "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.2",
     "mysql2": "^2.2.5",
+    "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
     "sequelize": "^6.4.0",
+    "stripe": "^8.140.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
