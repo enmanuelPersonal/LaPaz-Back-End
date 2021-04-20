@@ -1,19 +1,19 @@
-const { sequelize } = require('../../../db/config/database');
+const { sequelize } = require("../../../db/config/database");
 const {
   Identidad,
   Pariente,
   TipoIdentidad,
-} = require('../../../db/models/relaciones');
-const { getNameDireccion } = require('../../helpers/getNamesDireccion');
-const { createIdentidad, updateIdentidad } = require('../../helpers/identidad');
-const { createPariente } = require('../../helpers/pariente');
-const { createPersona, updatePersona } = require('../../helpers/persona');
+} = require("../../../db/models/relaciones");
+const { getNameDireccion } = require("../../helpers/getNamesDireccion");
+const { createIdentidad, updateIdentidad } = require("../../helpers/identidad");
+const { createPariente } = require("../../helpers/pariente");
+const { createPersona, updatePersona } = require("../../helpers/persona");
 const {
   personParienteParams,
   clientParienteParams,
   personSuscripcionParienteParams,
   clientParienteSuscripcionParams,
-} = require('../../utils/constant');
+} = require("../../utils/constant");
 
 // {
 //   "nombre" : "Jose Enmanuel",
@@ -30,13 +30,13 @@ const {
 module.exports = {
   async addPariente(req, res) {
     const {
-      apellido = '',
-      sexo = '',
-      idCliente = '',
-      identidades = '',
-      idPersona: idPersonaCreate = '',
-      nombre = '',
-      nacimiento = '',
+      apellido = "",
+      sexo = "",
+      idCliente = "",
+      identidades = "",
+      idPersona: idPersonaCreate = "",
+      nombre = "",
+      nacimiento = "",
       telefonos = [],
       correos = [],
       direcciones = [],
@@ -81,18 +81,21 @@ module.exports = {
           personParienteParams,
           {
             model: Identidad,
-            as: 'ParienteIdentidad',
-            attributes: ['serie'],
-            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
+            as: "ParienteIdentidad",
+            attributes: ["serie"],
+            include: [{ model: TipoIdentidad, as: "TipoIdentidad" }],
           },
           clientParienteParams,
         ],
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
       });
       if (parientes.length) {
         await Promise.all(
           await parientes.map(async (pariente) => {
-            if (!pariente.ParientePersona) {
+            if (
+              !pariente.ParientePersona ||
+              !pariente.ParientePersona.status
+            ) {
               return;
             }
 
@@ -166,9 +169,9 @@ module.exports = {
         );
       }
 
-      if (parseData.length > limit) {
-        parseData = parseData.slice(0, limit + 1);
-      }
+      // if (parseData.length > limit) {
+      //   parseData = parseData.slice(0, limit + 1);
+      // }
 
       return res.status(200).send({ data: parseData });
     } catch (error) {
@@ -186,9 +189,9 @@ module.exports = {
           personParienteParams,
           {
             model: Identidad,
-            as: 'ParienteIdentidad',
-            attributes: ['serie'],
-            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
+            as: "ParienteIdentidad",
+            attributes: ["serie"],
+            include: [{ model: TipoIdentidad, as: "TipoIdentidad" }],
             where: {
               serie,
             },
@@ -287,9 +290,9 @@ module.exports = {
           personSuscripcionParienteParams,
           {
             model: Identidad,
-            as: 'ParienteIdentidad',
-            attributes: ['serie'],
-            include: [{ model: TipoIdentidad, as: 'TipoIdentidad' }],
+            as: "ParienteIdentidad",
+            attributes: ["serie"],
+            include: [{ model: TipoIdentidad, as: "TipoIdentidad" }],
           },
           clientParienteSuscripcionParams,
         ],
@@ -375,9 +378,9 @@ module.exports = {
         );
       }
 
-      if (parseData.length > limit) {
-        parseData = parseData.slice(0, limit + 1);
-      }
+      // if (parseData.length > limit) {
+      //   parseData = parseData.slice(0, limit + 1);
+      // }
 
       return res.status(200).send({ data: parseData });
     } catch (error) {
@@ -401,16 +404,16 @@ module.exports = {
   // }
   async updatePariente(req, res) {
     const {
-      apellido = '',
-      sexo = '',
-      idPariente = '',
-      idCliente = '',
-      identidades = '',
-      idIdentidad = '',
-      idEntidad = '',
-      idPersona = '',
-      nombre = '',
-      nacimiento = '',
+      apellido = "",
+      sexo = "",
+      idPariente = "",
+      idCliente = "",
+      identidades = "",
+      idIdentidad = "",
+      idEntidad = "",
+      idPersona = "",
+      nombre = "",
+      nacimiento = "",
       telefonos = [],
       correos = [],
       direcciones = [],
@@ -423,7 +426,7 @@ module.exports = {
       });
 
       if (!getPariente) {
-        return res.status(409).send({ message: 'Este Pariente no existe' });
+        return res.status(409).send({ message: "Este Pariente no existe" });
       }
 
       const { status, message } = await updatePersona({
@@ -490,7 +493,7 @@ module.exports = {
       });
 
       if (!getPariente) {
-        return res.status(409).send({ message: 'Este Pariente no existe' });
+        return res.status(409).send({ message: "Este Pariente no existe" });
       }
 
       const data = await Entidad.update(

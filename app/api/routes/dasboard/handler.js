@@ -1,16 +1,18 @@
-const { sequelize } = require('../../../db/config/database');
+const { sequelize } = require("../../../db/config/database");
 const {
   Compra,
   Factura,
   Suscripcion,
   Pariente,
-} = require('../../../db/models/relaciones');
+  Entidad,
+  Persona,
+} = require("../../../db/models/relaciones");
 
 module.exports = {
   async getIngresos(req, res) {
     try {
-      const getTotalCompra = await Compra.sum('total');
-      const getTotalVenta = await Factura.sum('total');
+      const getTotalCompra = await Compra.sum("total");
+      const getTotalVenta = await Factura.sum("total");
 
       const ingresos = parseFloat(getTotalVenta - getTotalCompra);
 
@@ -29,10 +31,41 @@ module.exports = {
     }
   },
   async getTotalParientes(req, res) {
+    let getTotal = 0;
     try {
-      const getTotalParientes = await Pariente.count();
+      const getTotalParientes = await Pariente.findAll({
+        include: [
+          {
+            model: Persona,
+            as: "ParientePersona",
 
-      return res.status(201).send({ data: getTotalParientes });
+            include: [
+              {
+                model: Entidad,
+                as: "EntidadPersona",
+              },
+            ],
+          },
+        ],
+      });
+
+      if (getTotalParientes.length) {
+        getTotalParientes.forEach((pariente) => {
+          if (pariente.ParientePersona) {
+            const {
+              ParientePersona: {
+                EntidadPersona: { status },
+              },
+            } = pariente;
+
+            if (pariente.ParientePersona.status && status) {
+              getTotal += 1;
+            }
+          }
+        });
+      }
+
+      return res.status(201).send({ data: getTotal });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -41,12 +74,12 @@ module.exports = {
     const dateNow = new Date();
 
     try {
-      const getTotalVentaMes = await Factura.sum('total', {
+      const getTotalVentaMes = await Factura.sum("total", {
         where: sequelize.where(
           sequelize.fn(
-            'date_part',
-            'month',
-            sequelize.col('Factura.createdAt')
+            "date_part",
+            "month",
+            sequelize.col("Factura.createdAt")
           ),
           dateNow.getMonth() + 1
         ),
@@ -66,12 +99,12 @@ module.exports = {
     try {
       await Promise.all(
         await meses.map(async (mes) => {
-          let getTotalVentaMes = await Factura.sum('total', {
+          let getTotalVentaMes = await Factura.sum("total", {
             where: sequelize.where(
               sequelize.fn(
-                'date_part',
-                'month',
-                sequelize.col('Factura.createdAt')
+                "date_part",
+                "month",
+                sequelize.col("Factura.createdAt")
               ),
               mes
             ),
@@ -96,9 +129,9 @@ module.exports = {
           let getTotalSuscripcionMes = await Suscripcion.count({
             where: sequelize.where(
               sequelize.fn(
-                'date_part',
-                'month',
-                sequelize.col('Suscripcion.createdAt')
+                "date_part",
+                "month",
+                sequelize.col("Suscripcion.createdAt")
               ),
               mes
             ),

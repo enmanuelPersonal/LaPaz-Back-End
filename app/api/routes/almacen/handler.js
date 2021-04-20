@@ -7,7 +7,6 @@ const {
 module.exports = {
   async addAlmacen(req, res) {
     const { nombre, capacidad } = req.body;
-    console.log('Estoy aqui 1');
     try {
       const AlmacenExist = await Almacen.findOne({
         where: { nombre },
@@ -19,7 +18,6 @@ module.exports = {
           message: 'Esta Almacen ya existe.',
         });
       }
-      console.log('Estoy aqui');
       const data = await Almacen.create({
         nombre,
         capacidad,
@@ -50,7 +48,7 @@ module.exports = {
   async addProductoAlmacen(req, res) {
     const { idAlmacen, productos = [] } = req.body;
     let idProduct = [];
-    console.log('object');
+
     try {
       const AlmacenExist = await Almacen.findOne({
         where: { idAlmacen },

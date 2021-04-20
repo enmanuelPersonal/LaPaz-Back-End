@@ -141,9 +141,9 @@ module.exports = {
         );
       }
 
-      if (parseData.length > limit) {
-        parseData = parseData.slice(0, limit + 1);
-      }
+      // if (parseData.length > limit) {
+      //   parseData = parseData.slice(0, limit + 1);
+      // }
 
       return res.status(200).send({ data: parseData });
     } catch (error) {
