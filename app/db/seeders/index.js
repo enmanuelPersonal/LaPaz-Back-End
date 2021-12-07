@@ -15,6 +15,7 @@ const {
   TipoUsuario,
   Categoria,
   TipoProducto,
+  ConfSuplidor,
 } = require("../models/relaciones");
 
 (async function () {
@@ -92,14 +93,9 @@ const {
         }
       ),
       console.log("Seed TipoPago"),
-      await TipoPlan.bulkCreate(
-        [
-          { tipo: "Basico", monto: 100.0 },
-        ],
-        {
-          validate: true,
-        }
-      ),
+      await TipoPlan.bulkCreate([{ tipo: "Basico", monto: 100.0 }], {
+        validate: true,
+      }),
       console.log("Seed TipoPlan"),
       await UnidadMedida.bulkCreate(
         [
@@ -142,7 +138,14 @@ const {
           validate: true,
         }
       ),
-      console.log("Seed Tipo Productos")
+      console.log("Seed Tipo Productos"),
+      await ConfSuplidor.bulkCreate(
+        [{ validacion: "tiempoEntrega", isRequerido: true }],
+        {
+          validate: true,
+        }
+      ),
+      console.log("Seed Configuracion del suplidor")
     );
   } catch (error) {
     console.error("No es posible crear los Seeders", error);

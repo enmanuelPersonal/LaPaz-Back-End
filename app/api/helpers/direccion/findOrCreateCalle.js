@@ -21,6 +21,7 @@ module.exports = {
 
       return getCalle.idCalle;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },

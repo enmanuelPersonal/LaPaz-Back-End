@@ -47,6 +47,7 @@ module.exports = {
 
       return true;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },

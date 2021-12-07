@@ -22,6 +22,7 @@ module.exports = {
 
       return getCasa.idCasa;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },

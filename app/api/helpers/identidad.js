@@ -20,6 +20,7 @@ module.exports = {
         idIdentidad: newIdentidad.idIdentidad,
       };
     } catch (error) {
+      console.log("Error: ", error);
       return {
         status: false,
         message:
@@ -52,6 +53,7 @@ module.exports = {
         status: true,
       };
     } catch (error) {
+      console.log("Error: ", error);
       return {
         status: false,
         message: `No se pudo actualizar la identidad ${error}`,

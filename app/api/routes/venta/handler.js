@@ -11,8 +11,9 @@ const {
   SalidaServicios,
   Transporte,
   Entidad,
-} = require('../../../db/models/relaciones');
-const { createDireccion } = require('../../helpers/direccion/direccion');
+} = require("../../../db/models/relaciones");
+const { createDireccion } = require("../../helpers/direccion/direccion");
+const { createPedido } = require("../../helpers/Pedidos/Pedidos");
 
 // {
 //   "idCliente": "e9b53c62-5363-4efd-9fe6-a5efe9b61405",
@@ -41,7 +42,7 @@ module.exports = {
       idItebis,
       idEmpleado,
       idVehiculo,
-      idDireccion = '',
+      idDireccion = "",
       direcciones = [],
       isEnvio = true,
     } = req.body;
@@ -57,21 +58,21 @@ module.exports = {
       if (!clientExist) {
         return res.status(409).send({
           data: clientExist,
-          message: 'Este Cliente no existe.',
+          message: "Este Cliente no existe.",
         });
       }
 
       if (!detalle.length) {
         return res.status(409).send({
           data: [],
-          message: 'Debe tener productos seleccionados.',
+          message: "Debe tener productos seleccionados.",
         });
       }
 
       if (!tipoPagos.length) {
         return res.status(409).send({
           data: [],
-          message: 'Debe tener un tipo de pago.',
+          message: "Debe tener un tipo de pago.",
         });
       }
 
@@ -106,8 +107,8 @@ module.exports = {
               include: [
                 {
                   model: TipoProducto,
-                  as: 'ProductoTipo',
-                  where: { tipo: 'producto' },
+                  as: "ProductoTipo",
+                  where: { tipo: "producto" },
                 },
               ],
               where: { idProducto },
@@ -139,7 +140,7 @@ module.exports = {
           if (!direccionesIds) {
             return {
               status: false,
-              message: 'Direcciones incorrectas',
+              message: "Direcciones incorrectas",
             };
           }
           getIdDireccion = direccionesIds[0];
@@ -153,6 +154,8 @@ module.exports = {
           hora: `${getDate.getHours()}:${getDate.getMinutes()}:${getDate.getSeconds()}`,
         });
       }
+console.log("ESTOY AQUI")
+      await createPedido({ detalle });
 
       return res.status(201).send({ data });
     } catch (error) {
@@ -180,12 +183,12 @@ module.exports = {
       if (!detalle.length) {
         return res.status(409).send({
           data: [],
-          message: 'Debe tener productos seleccionados.',
+          message: "Debe tener productos seleccionados.",
         });
       }
 
       const getTipoPago = await TipoPago.findOne({
-        where: { tipo: 'Tarjeta' },
+        where: { tipo: "Tarjeta" },
       });
 
       const getItebit = await Itebis.findOne({
@@ -195,7 +198,7 @@ module.exports = {
       data = await Factura.create({
         idCliente,
         total,
-        NFC: 'eewwewewe',
+        NFC: "eewwewewe",
         idItebis: getItebit.idItebis,
       });
 
@@ -223,8 +226,8 @@ module.exports = {
               include: [
                 {
                   model: TipoProducto,
-                  as: 'ProductoTipo',
-                  where: { tipo: 'producto' },
+                  as: "ProductoTipo",
+                  where: { tipo: "producto" },
                 },
               ],
               where: { idProducto },
@@ -242,6 +245,8 @@ module.exports = {
         })
       );
 
+      await createPedido({ detalle });
+
       return res.status(201).send({ data });
     } catch (error) {
       return res.status(500).send({ message: error.message });
@@ -256,16 +261,16 @@ module.exports = {
         include: [
           {
             model: Cliente,
-            as: 'FacturaCliente',
+            as: "FacturaCliente",
             include: [
               {
                 model: Persona,
-                as: 'ClientePersona',
+                as: "ClientePersona",
 
                 include: [
                   {
                     model: Entidad,
-                    as: 'EntidadPersona',
+                    as: "EntidadPersona",
                     where: { status: true },
                   },
                 ],
@@ -274,8 +279,8 @@ module.exports = {
           },
           {
             model: DetalleFactura,
-            as: 'FacturaDetalle',
-            include: [{ model: Producto, as: 'DetalleFacturaProducto' }],
+            as: "FacturaDetalle",
+            include: [{ model: Producto, as: "DetalleFacturaProducto" }],
           },
         ],
       });
@@ -347,8 +352,8 @@ module.exports = {
         include: [
           {
             model: DetalleFactura,
-            as: 'FacturaDetalle',
-            include: [{ model: Producto, as: 'DetalleFacturaProducto' }],
+            as: "FacturaDetalle",
+            include: [{ model: Producto, as: "DetalleFacturaProducto" }],
           },
         ],
         where: { idCliente },
@@ -388,7 +393,7 @@ module.exports = {
     const {
       numFactura,
       status = true,
-      statusTransporte = 'Proceso',
+      statusTransporte = "Proceso",
       isEnvio = true,
     } = req.body;
 
@@ -428,7 +433,7 @@ module.exports = {
       if (isEnvio) {
         await Transporte.update(
           {
-            status: 'Cancelada',
+            status: "Cancelada",
           },
           { where: { numFactura } }
         );

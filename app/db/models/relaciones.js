@@ -47,8 +47,10 @@ const Pais = require('./Pais'),
   SalidaServicios = require('./SalidaServicios'),
   EntradaServicios = require('./EntradaServicios'),
   HistorialTiempoServicios = require('./HistorialTiempoServicios'),
-  Versiones = require('./Versiones'),
-  HistorialSuscripcion = require('./HistorialSuscripcion');
+  HistorialSuscripcion = require('./HistorialSuscripcion'),
+  Pedido = require('./Pedido'),
+  ConfSuplidor = require('./ConfSuplidor'),
+  DetallePedido = require('./DetallePedido');
 
 // Calle
 Calle.hasMany(Casa, {
@@ -495,13 +497,45 @@ Vehiculo.belongsTo(Modelo, {
   foreignKey: 'idModelo',
 });
 
-// Compra.sync({
+//Pedido
+Pedido.belongsTo(Suplidor, {
+  as: 'PedidoSuplidor',
+  foreignKey: 'idSuplidor',
+});
+
+//DetallePedido
+Pedido.hasMany(DetallePedido, {
+  as: 'PedidoDetalle',
+  foreignKey: 'numPedido',
+});
+
+DetallePedido.belongsTo(Pedido, {
+  as: 'DetallePedidoos',
+  foreignKey: 'numPedido',
+});
+
+DetallePedido.belongsTo(Producto, {
+  as: 'DetallePedidoProducto',
+  foreignKey: 'idProducto',
+});
+
+Compra.belongsToMany(Pedido, {
+  as: 'CompraPedido',
+  through: 'CompraVSPedido',
+});
+
+Pedido.belongsToMany(Compra, {
+  as: 'PedidoCompra',
+  through: 'CompraVSPedido',
+});
+
+// DetallePedido.sync({
 //   logging: console.log,
 //   force: true,
 // })
-// .then(() => console.log("conectado"))
+// .then(() => console.log('conectado'))
 // .catch((error) => {
-//   console.error("No se pudo conectar:", error);
+//   console.error('No se pudo conectar:', error);
 // });
 
 module.exports = {
@@ -555,5 +589,7 @@ module.exports = {
   DetalleCompra,
   EntradaServicios,
   SalidaServicios,
-  Versiones
+  Pedido,
+  DetallePedido,
+  ConfSuplidor,
 };

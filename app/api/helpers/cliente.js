@@ -82,6 +82,7 @@ module.exports = {
         data,
       };
     } catch (error) {
+      console.log("Error: ", error);
       return true;
     }
   },

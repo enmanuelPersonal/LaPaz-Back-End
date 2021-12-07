@@ -58,6 +58,7 @@ module.exports = {
 
       return notError && arrayDireccion;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },
@@ -115,6 +116,7 @@ module.exports = {
 
       return notError && arrayDireccion;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },

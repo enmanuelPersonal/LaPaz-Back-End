@@ -23,6 +23,7 @@ module.exports = {
 
       return notError;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },
@@ -51,6 +52,7 @@ module.exports = {
 
       return notError;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },

@@ -82,6 +82,7 @@ module.exports = {
         idEntidad: newEntidad.idEntidad,
       };
     } catch (error) {
+      console.log("Error: ", error);
       return {
         status: false,
         message: "No se pudo crear la Entidad",
@@ -160,6 +161,7 @@ module.exports = {
         idEntidad: getEntidad.idEntidad,
       };
     } catch (error) {
+      console.log("Error: ", error);
       return {
         status: false,
         message: "No se pudo actualizar la Entidad",

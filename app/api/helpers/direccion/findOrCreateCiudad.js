@@ -21,6 +21,7 @@ module.exports = {
 
       return getCiudad.idCiudad;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },

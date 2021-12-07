@@ -9,6 +9,7 @@ module.exports = {
 
       return pais.idPais;
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },

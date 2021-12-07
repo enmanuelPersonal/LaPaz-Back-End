@@ -24,6 +24,7 @@ module.exports = {
 
       return notError ? array : [];
     } catch (error) {
+      console.log("Error: ", error);
       return [];
     }
   },

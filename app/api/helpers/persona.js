@@ -63,6 +63,7 @@ module.exports = {
         idEntidad,
       };
     } catch (error) {
+      console.log("Error: ", error);
       return {
         status: false,
         message: 'No se pudo crear la Persona',
@@ -129,6 +130,7 @@ module.exports = {
         status: true,
       };
     } catch (error) {
+      console.log("Error: ", error);
       return {
         status: false,
         message: 'No se pudo actualizar la Persona',

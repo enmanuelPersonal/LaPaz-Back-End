@@ -65,6 +65,7 @@ module.exports = {
         casa: { numero, referencia },
       };
     } catch (error) {
+      console.log("Error: ", error);
       return false;
     }
   },
