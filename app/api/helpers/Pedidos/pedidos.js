@@ -4,8 +4,15 @@ const {
   ConfSuplidor,
   Pedido,
   DetallePedido,
+  ImagenProducto,
+  Producto,
+  Suplidor,
+  Identidad,
+  TipoIdentidad,
 } = require("../../../db/models/relaciones");
+const { personSuplidorParams } = require("../../utils/constant");
 const dateDiff = require("../../utils/dateDiff");
+const { correoPedido } = require("../correos/sendPedido");
 const { pedidosByPrecios } = require("./pedidosByPrecios");
 
 module.exports = {
@@ -14,29 +21,44 @@ module.exports = {
     let getProdutoSuplidor = {};
     const getSuplidores = {};
     let totalSuplidor = {};
-    console.log("ESTOY EN PEDIDO");
+    let inPedido = false;
+
     try {
       await Promise.all(
         detalle.map(async ({ idProducto }) => {
-          const getLog = await ProductoLog.findOne({ where: { idProducto } });
+          const getDetallePedidoProducto = await DetallePedido.findAll({
+            include: [
+              {
+                model: Pedido,
+                as: "DetallePedidoos",
+                where: { status: "Proceso" },
+              },
+            ],
+            where: { idProducto },
+          });
 
-          if (getLog) {
-            const { stock, reorden } = getLog;
+          inPedido = getDetallePedidoProducto.length > 0 ? true : false;
 
-            if (stock <= reorden) {
-              getProdutos.push(idProducto);
+          if (!inPedido) {
+            const getLog = await ProductoLog.findOne({ where: { idProducto } });
+
+            if (getLog) {
+              const { stock, reorden } = getLog;
+
+              if (stock <= reorden) {
+                getProdutos.push(idProducto);
+              }
             }
           }
         })
       );
-      console.log("ESTOY EN PEDIDO 1", getProdutos);
+
       if (getProdutos.length) {
         const { isRequerido } = await ConfSuplidor.findOne({
           where: { validacion: "tiempoEntrega" },
         });
-        console.log("ESTOY EN PEDIDO 2", isRequerido);
+
         if (isRequerido) {
-          console.log("ESTOY EN PEDIDO 3");
           await Promise.all(
             getProdutos.map(async (idProducto) => {
               const getDetallePedidoProducto = await DetallePedido.findAll({
@@ -49,11 +71,22 @@ module.exports = {
                 ],
                 where: { idProducto },
               });
-              console.log("object ===============> ", getDetallePedidoProducto);
+
               if (getDetallePedidoProducto.length) {
-                console.log("ENTRAAAAAAAAAA");
                 getDetallePedidoProducto.map(
-                  async ({ numPedido, idProducto, precio, cantidad }) => {
+                  async ({ numPedido, idProducto, precio }) => {
+                    const { cantCompra } = await ProductoLog.findOne({
+                      where: { idProducto },
+                    });
+
+                    const { nombre, descripcion } = await Producto.findOne({
+                      where: { idProducto },
+                    });
+
+                    const { url } = await ImagenProducto.findOne({
+                      where: { idProducto },
+                    });
+
                     const { createAt, fechaEntrega, idSuplidor } =
                       await Pedido.findOne({
                         where: {
@@ -65,22 +98,26 @@ module.exports = {
                       fin: fechaEntrega,
                     });
                     if (getProdutoSuplidor.hasOwnProperty([idProducto])) {
-                      console.log("ESTOY EN PEDIDO 4");
                       if (getProdutoSuplidor[idProducto]["dias"] > getDias) {
                         getProdutoSuplidor[idProducto] = {
                           dias: getDias,
                           idSuplidor,
                           precio,
-                          cantidad,
+                          cantidad: cantCompra,
+                          imagen: url,
+                          nombre,
+                          descripcion,
                         };
                       }
                     } else {
-                      console.log("ESTOY EN PEDIDO 5");
                       getProdutoSuplidor[idProducto] = {
                         dias: getDias,
                         idSuplidor,
                         precio,
-                        cantidad,
+                        cantidad: cantCompra,
+                        imagen: url,
+                        nombre,
+                        descripcion,
                       };
                     }
                   }
@@ -91,22 +128,15 @@ module.exports = {
                   idProducto,
                   getProdutoSuplidor,
                 });
-                console.log("ESTOY EN PEDIDO 7 ", data);
+
                 if (!error) {
                   getProdutoSuplidor = data;
-                  console.log(
-                    "PAPOOOOOOOOOOOOOOOOOOOOOOOOOO",
-                    error,
-                    getProdutoSuplidor
-                  );
                 }
               }
             })
           );
         } else {
-          console.log("ESTOY EN PEDIDO 8");
           const { data, error } = await pedidosByPrecios({
-            idProducto,
             getProdutoSuplidor,
             detalle: getProdutos,
           });
@@ -117,46 +147,50 @@ module.exports = {
         }
 
         // Hacer pedido by suplidor
-        console.log("ESTOY EN PEDIDO 10 ", getProdutoSuplidor);
         Object.keys(getProdutoSuplidor).forEach((key) => {
-          const { idSuplidor, precio, cantidad } = getProdutoSuplidor[key];
-          console.log(
-            "1111111111111111111111111111111111111111111111111111 ",
-            key
-          );
-          //   Object.keys(key).map(({ idSuplidor, precio, cantidad }) => {
-          console.log(
-            "AQUIIIIIIIIIIIIIIIIIIIIIIIIIIII EN KEY ",
-            idSuplidor,
-            precio,
-            cantidad
-          );
+          const { idSuplidor, precio, cantidad, imagen, nombre, descripcion } =
+            getProdutoSuplidor[key];
+
           if (getSuplidores.hasOwnProperty([idSuplidor])) {
-            console.log("-------------------------------------------");
             totalSuplidor[idSuplidor] =
               totalSuplidor[idSuplidor] + precio * cantidad;
 
             getSuplidores[idSuplidor] = [
               ...getSuplidores[idSuplidor],
-              { idProducto: key, cantidad, precio },
+              {
+                idProducto: key,
+                idSuplidor,
+                precio,
+                cantidad,
+                imagen,
+                nombre,
+                descripcion,
+              },
             ];
           } else {
-            console.log("------------------------------------------- 1");
             totalSuplidor[idSuplidor] = precio * cantidad;
-            getSuplidores[idSuplidor] = [{ idProducto: key, cantidad, precio }];
+            getSuplidores[idSuplidor] = [
+              {
+                idProducto: key,
+                idSuplidor,
+                precio,
+                cantidad,
+                imagen,
+                nombre,
+                descripcion,
+              },
+            ];
           }
-          //   });
         });
-        console.log("ESTOY EN PEDIDO 11", getSuplidores);
+
         await Promise.all(
           Object.keys(getSuplidores).map(async (key) => {
-            console.log("cccccccccccccccccccccccccccccccccccccc ", key);
             const { numPedido } = await Pedido.create({
               total: totalSuplidor[key],
               status: "Proceso",
               idSuplidor: key,
             });
-            console.log("ESTOY EN PEDIDO 12 ", numPedido);
+
             getSuplidores[key].map(async ({ idProducto, cantidad, precio }) => {
               await DetallePedido.create({
                 numPedido,
@@ -164,7 +198,21 @@ module.exports = {
                 cantidad,
                 precio,
               });
-              console.log("ESTOY EN PEDIDO 13");
+            });
+
+            const {
+              SuplidorPersona: {
+                EntidadPersona: { EntidadCorreo },
+              },
+            } = await Suplidor.findOne({
+              where: { idSuplidor: key },
+              include: [personSuplidorParams],
+            });
+
+            await correoPedido({
+              correo: EntidadCorreo[0].correo,
+              detalle: getSuplidores[key],
+              total: totalSuplidor[key],
             });
           })
         );

@@ -16,6 +16,7 @@ const {
   Categoria,
   TipoProducto,
   ConfSuplidor,
+  Almacen,
 } = require("../models/relaciones");
 
 (async function () {
@@ -145,7 +146,14 @@ const {
           validate: true,
         }
       ),
-      console.log("Seed Configuracion del suplidor")
+      console.log("Seed Configuracion del suplidor"),
+      await Almacen.bulkCreate(
+        [{ nombre: "Almacen A", capacidad: 2000, status: true }],
+        {
+          validate: true,
+        }
+      ),
+      console.log("Seed Almacen")
     );
   } catch (error) {
     console.error("No es posible crear los Seeders", error);

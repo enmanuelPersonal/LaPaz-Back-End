@@ -1,4 +1,4 @@
-const { sequelize } = require('../../../db/config/database');
+const { sequelize } = require("../../../db/config/database");
 const {
   Entidad,
   TipoProducto,
@@ -9,12 +9,8 @@ const {
   ProductoLog,
   TipoPago,
   Persona,
-} = require('../../../db/models/relaciones');
-const { findOrCreate } = require('../../helpers/productoSuplidor');
-const {
-  personUserParams,
-  personSuplidorParams,
-} = require('../../utils/constant');
+} = require("../../../db/models/relaciones");
+const { findOrCreate } = require("../../helpers/productoSuplidor");
 // {
 //   "idSuplidor": "sdssdwewedcd",
 //     "detalle": [{numCompra: "we233", idProducto: "wedw232", cantidad: 12, precio: 200}],
@@ -22,8 +18,7 @@ const {
 //     "total": 200
 // }
 module.exports = {
-  async addCompra(req, res) {
-    const { idSuplidor, detalle, total } = req.body;
+  async addCompraByPedido({ idSuplidor, detalle, total, numPedido }) {
     let data = {};
 
     try {
@@ -34,14 +29,14 @@ module.exports = {
       if (!suplidorExist) {
         return res.status(409).send({
           data: suplidorExist,
-          message: 'Este Suplidor no existe.',
+          message: "Este Suplidor no existe.",
         });
       }
 
       if (!detalle.length) {
         return res.status(409).send({
           data: [],
-          message: 'Debe tener productos seleccionados.',
+          message: "Debe tener productos seleccionados.",
         });
       }
 
@@ -53,7 +48,7 @@ module.exports = {
       // }
 
       const { idTipoPago } = await TipoPago.findOne({
-        where: { tipo: 'Efectivo' },
+        where: { tipo: "Efectivo" },
       });
 
       data = await Compra.create({
@@ -65,6 +60,7 @@ module.exports = {
 
       if (idTipoPago) {
         await data.setCompraTipoPago([idTipoPago]);
+        await data.setCompraPedido([numPedido]);
       }
 
       await Promise.all(
@@ -87,8 +83,8 @@ module.exports = {
               include: [
                 {
                   model: TipoProducto,
-                  as: 'ProductoTipo',
-                  where: { tipo: 'producto' },
+                  as: "ProductoTipo",
+                  where: { tipo: "producto" },
                 },
               ],
               where: { idProducto },
@@ -100,17 +96,17 @@ module.exports = {
             const getDetalle = await DetalleCompra.findAll({
               attributes: [
                 [
-                  sequelize.fn('SUM', sequelize.col('cantidad')),
-                  'cantProducto',
+                  sequelize.fn("SUM", sequelize.col("cantidad")),
+                  "cantProducto",
                 ],
-                [sequelize.fn('SUM', sequelize.col('precio')), 'sumPrecio'],
+                [sequelize.fn("SUM", sequelize.col("precio")), "sumPrecio"],
               ],
 
               where: {
                 idProducto,
               },
 
-              group: ['precio'],
+              group: ["precio"],
             });
 
             getDetalle.forEach(
@@ -144,92 +140,16 @@ module.exports = {
         })
       );
 
-      return res.status(201).send({ data });
+      return {
+        error: false,
+        data,
+      };
     } catch (error) {
-      return res.status(500).send({ message: error.message });
-    }
-  },
-  async getCompra(req, res) {
-    const { limit = 10 } = req.query;
-    let parseData = [];
-
-    try {
-      const compra = await Compra.findAll({
-        where: { status: true },
-        include: [
-          {
-            model: Suplidor,
-            as: 'CompraSuplidor',
-            include: [
-              {
-                model: Persona,
-                as: 'SuplidorPersona',
-
-                include: [
-                  {
-                    model: Entidad,
-                    as: 'EntidadPersona',
-                    where: { status: true },
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            model: DetalleCompra,
-            as: 'CompraDetalle',
-            include: [{ model: Producto, as: 'DetalleCompraProducto' }],
-          },
-        ],
-      });
-
-      if (compra.length) {
-        compra.map((comp) => {
-          const {
-            numCompra,
-            total,
-            status,
-            createdAt,
-            CompraSuplidor: {
-              SuplidorPersona: {
-                apellido,
-                EntidadPersona: { nombre },
-              },
-            },
-            CompraDetalle,
-          } = comp;
-
-          const getDetalle = CompraDetalle.map(
-            ({
-              cantidad,
-              precio,
-              DetalleCompraProducto: { nombre, descripcion },
-            }) => ({
-              cantidad,
-              precio,
-              nombre,
-              descripcion,
-            })
-          );
-
-          return parseData.push({
-            numCompra,
-            total,
-            status,
-            createdAt,
-            apellido,
-            nombre,
-            detalle: getDetalle,
-          });
-        });
-      }
-      // if (parseData.length > limit) {
-      //   parseData = parseData.slice(0, limit + 1);
-      // }
-
-      return res.status(201).send({ data: parseData });
-    } catch (error) {
-      return res.status(500).send({ message: error.message });
+      console.log("Error: ", error);
+      return {
+        error: true,
+        data: "",
+      };
     }
   },
 };

@@ -154,7 +154,7 @@ module.exports = {
           hora: `${getDate.getHours()}:${getDate.getMinutes()}:${getDate.getSeconds()}`,
         });
       }
-console.log("ESTOY AQUI")
+      
       await createPedido({ detalle });
 
       return res.status(201).send({ data });

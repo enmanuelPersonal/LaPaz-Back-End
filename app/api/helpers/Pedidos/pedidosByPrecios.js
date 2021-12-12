@@ -1,4 +1,10 @@
-const { DetalleCompra, Compra } = require("../../../db/models/relaciones");
+const {
+  DetalleCompra,
+  Compra,
+  ProductoLog,
+  Producto,
+  ImagenProducto,
+} = require("../../../db/models/relaciones");
 
 module.exports = {
   async pedidosByPrecios({ idProducto, getProdutoSuplidor, detalle = [] }) {
@@ -6,92 +12,111 @@ module.exports = {
 
     try {
       if (detalle.length) {
-        console.log("ESTOY EN PEDIDO POR PRECIO ", detalle);
         await Promise.all(
           detalle.map(async (idProducto) => {
             const getDetalleCompraProducto = await DetalleCompra.findAll({
-              // attributes: [
-              //     [
-              //       sequelize.fn('SUM', sequelize.col('cantidad')),
-              //       'cantProducto',
-              //     ],
-              //     [sequelize.fn('SUM', sequelize.col('precio')), 'sumPrecio'],
-              //   ],
-
               where: {
                 idProducto,
               },
-
-              //   group: ['precio'],
             });
 
             if (getDetalleCompraProducto.length) {
-              console.log("ESTOY EN PEDIDO POR PRECIO 1");
+              await Promise.all(
+                getDetalleCompraProducto.map(
+                  async ({ idProducto, precio, numCompra }) => {
+                    const { cantCompra } = await ProductoLog.findOne({
+                      where: { idProducto },
+                    });
 
-              getDetalleCompraProducto.map(
-                async ({ idProducto, precio, cantidad, numCompra }) => {
-                  const { idSuplidor } = await Compra.findOne({
-                    where: { numCompra },
-                  });
-                  console.log("PUTOOOOOOOOO", idSuplidor);
-                  if (getProdutoSuplidorTemp.hasOwnProperty([idProducto])) {
-                    console.log("ESTOY EN PEDIDO POR PRECIO 2");
-                    if (getProdutoSuplidorTemp[idProducto]["precio"] > precio) {
-                      console.log("ESTOY EN PEDIDO POR PRECIO 3");
+                    const { nombre, descripcion } = await Producto.findOne({
+                      where: { idProducto },
+                    });
+
+                    const { url } = await ImagenProducto.findOne({
+                      where: { idProducto },
+                    });
+
+                    const { idSuplidor } = await Compra.findOne({
+                      where: { numCompra },
+                    });
+
+                    if (getProdutoSuplidorTemp.hasOwnProperty([idProducto])) {
+                      if (
+                        getProdutoSuplidorTemp[idProducto]["precio"] > precio
+                      ) {
+                        getProdutoSuplidorTemp[idProducto] = {
+                          dias: "",
+                          idSuplidor,
+                          precio,
+                          cantidad: cantCompra,
+                          imagen: url,
+                          nombre,
+                          descripcion,
+                        };
+                      }
+                    } else {
                       getProdutoSuplidorTemp[idProducto] = {
                         dias: "",
                         idSuplidor,
                         precio,
-                        cantidad,
+                        cantidad: cantCompra,
+                        imagen: url,
+                        nombre,
+                        descripcion,
                       };
                     }
-                  } else {
-                    console.log("ESTOY EN PEDIDO POR PRECIO 4");
-                    getProdutoSuplidorTemp[idProducto] = {
-                      dias: "",
-                      idSuplidor,
-                      precio,
-                      cantidad,
-                    };
                   }
-                }
+                )
               );
             }
           })
         );
       } else {
-        console.log("ESTOY EN PEDIDO POR PRECIO 5");
         const getDetalleCompraProducto = await DetalleCompra.findAll({
           where: { idProducto },
         });
-        console.log("==============> ", getDetalleCompraProducto);
+
         if (getDetalleCompraProducto.length) {
-          console.log("ESTOY EN PEDIDO POR PRECIO 6");
           await Promise.all(
             getDetalleCompraProducto.map(
-              async ({ idProducto, precio, cantidad, numCompra }) => {
+              async ({ idProducto, precio, numCompra }) => {
+                const { cantCompra } = await ProductoLog.findOne({
+                  where: { idProducto },
+                });
+
+                const { nombre, descripcion } = await Producto.findOne({
+                  where: { idProducto },
+                });
+
+                const { url } = await ImagenProducto.findOne({
+                  where: { idProducto },
+                });
+
                 const { idSuplidor } = await Compra.findOne({
                   where: { numCompra },
                 });
-                console.log("PUTOOOOOOOOO 1", idSuplidor);
+
                 if (getProdutoSuplidorTemp.hasOwnProperty([idProducto])) {
-                  console.log("ESTOY EN PEDIDO POR PRECIO 7");
                   if (getProdutoSuplidorTemp[idProducto]["precio"] > precio) {
-                    console.log("ESTOY EN PEDIDO POR PRECIO 8");
                     getProdutoSuplidorTemp[idProducto] = {
                       dias: "",
                       idSuplidor,
                       precio,
-                      cantidad,
+                      cantidad: cantCompra,
+                      imagen: url,
+                      nombre,
+                      descripcion,
                     };
                   }
                 } else {
-                  console.log("ESTOY EN PEDIDO POR PRECIO 9");
                   getProdutoSuplidorTemp[idProducto] = {
                     dias: "",
                     idSuplidor,
                     precio,
-                    cantidad,
+                    cantidad: cantCompra,
+                    imagen: url,
+                    nombre,
+                    descripcion,
                   };
                 }
               }

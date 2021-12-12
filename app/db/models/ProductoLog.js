@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
-const { sequelize } = require('../config/database');
-const { DataTypes } = require('sequelize');
+const { sequelize } = require("../config/database");
+const { DataTypes } = require("sequelize");
 
 const ProductoLog = sequelize.define(
-  'ProductoLog',
+  "ProductoLog",
   {
     idProductoLog: {
       allowNull: false,
@@ -29,6 +29,11 @@ const ProductoLog = sequelize.define(
     },
     reorden: {
       allowNull: false,
+      type: DataTypes.INTEGER,
+      defaultValue: 10,
+    },
+    cantCompra: {
+      allowNull: true,
       type: DataTypes.INTEGER,
       defaultValue: 10,
     },

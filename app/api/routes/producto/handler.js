@@ -1,12 +1,12 @@
-const { Op } = require('sequelize');
-const { sequelize } = require('../../../db/config/database');
+const { Op } = require("sequelize");
+const { sequelize } = require("../../../db/config/database");
 const {
   Producto,
   ImagenProducto,
   ProductoLog,
   TipoProducto,
   Categoria,
-} = require('../../../db/models/relaciones');
+} = require("../../../db/models/relaciones");
 
 // Debe insertar en: Producto, imagenProducto, ProductoLog
 // {
@@ -27,15 +27,16 @@ const {
 module.exports = {
   async addProducto(req, res) {
     const {
-      nombre = '',
-      descripcion = '',
+      nombre = "",
+      descripcion = "",
       idTipoProducto,
       idCategoria,
-      url = '',
+      url = "",
       stock = 0,
       costo = 0,
       precio = 0,
       reorden = 20,
+      cantCompra = 10,
     } = req.body;
     let data = {};
 
@@ -46,7 +47,7 @@ module.exports = {
         });
 
         if (productoExit) {
-          return res.status(409).send({ message: 'Este Producto ya existe' });
+          return res.status(409).send({ message: "Este Producto ya existe" });
         }
 
         data = await Producto.create(
@@ -76,6 +77,7 @@ module.exports = {
               costo,
               precio,
               reorden,
+              cantCompra,
               idProducto,
             },
             { transaction }
@@ -97,14 +99,14 @@ module.exports = {
         include: [
           {
             model: TipoProducto,
-            as: 'ProductoTipo',
+            as: "ProductoTipo",
           },
           {
             model: Categoria,
-            as: 'ProductoCategoria',
+            as: "ProductoCategoria",
           },
         ],
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
       });
 
       if (productos.length) {
@@ -141,9 +143,23 @@ module.exports = {
             });
 
             if (getLog) {
-              const { idProductoLog, stock, costo, precio, reorden } = getLog;
+              const {
+                idProductoLog,
+                stock,
+                costo,
+                precio,
+                reorden,
+                cantCompra,
+              } = getLog;
 
-              parseGetLog = { idProductoLog, stock, costo, precio, reorden };
+              parseGetLog = {
+                idProductoLog,
+                stock,
+                costo,
+                precio,
+                reorden,
+                cantCompra,
+              };
             }
 
             return parseData.push({
@@ -171,7 +187,7 @@ module.exports = {
     }
   },
   async getProductos(req, res) {
-    const { limit = 10, tipo = 'producto' } = req.query;
+    const { limit = 10, tipo = "producto" } = req.query;
     let parseData = [];
 
     try {
@@ -179,15 +195,15 @@ module.exports = {
         include: [
           {
             model: TipoProducto,
-            as: 'ProductoTipo',
+            as: "ProductoTipo",
             where: { tipo },
           },
           {
             model: Categoria,
-            as: 'ProductoCategoria',
+            as: "ProductoCategoria",
           },
         ],
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
       });
 
       if (productos.length) {
@@ -224,9 +240,23 @@ module.exports = {
             });
 
             if (getLog) {
-              const { idProductoLog, stock, costo, precio, reorden } = getLog;
+              const {
+                idProductoLog,
+                stock,
+                costo,
+                precio,
+                reorden,
+                cantCompra,
+              } = getLog;
 
-              parseGetLog = { idProductoLog, stock, costo, precio, reorden };
+              parseGetLog = {
+                idProductoLog,
+                stock,
+                costo,
+                precio,
+                reorden,
+                cantCompra,
+              };
             }
 
             return parseData.push({
@@ -254,7 +284,7 @@ module.exports = {
     }
   },
   async getProductosByCategorias(req, res) {
-    const { limit = 10, tipo = 'producto', categoria = 'ataudes' } = req.query;
+    const { limit = 10, tipo = "producto", categoria = "ataudes" } = req.query;
     let parseData = [];
 
     try {
@@ -262,16 +292,16 @@ module.exports = {
         include: [
           {
             model: TipoProducto,
-            as: 'ProductoTipo',
+            as: "ProductoTipo",
             where: { tipo },
           },
           {
             model: Categoria,
-            as: 'ProductoCategoria',
+            as: "ProductoCategoria",
             where: { categoria },
           },
         ],
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
       });
 
       if (productos.length) {
@@ -308,9 +338,23 @@ module.exports = {
             });
 
             if (getLog) {
-              const { idProductoLog, stock, costo, precio, reorden } = getLog;
+              const {
+                idProductoLog,
+                stock,
+                costo,
+                precio,
+                reorden,
+                cantCompra,
+              } = getLog;
 
-              parseGetLog = { idProductoLog, stock, costo, precio, reorden };
+              parseGetLog = {
+                idProductoLog,
+                stock,
+                costo,
+                precio,
+                reorden,
+                cantCompra,
+              };
             }
 
             return parseData.push({
@@ -339,7 +383,7 @@ module.exports = {
   },
   async getProductoByName(req, res) {
     const { name: nombre } = req.params;
-    const { limit = 10, tipo = 'producto' } = req.query;
+    const { limit = 10, tipo = "producto" } = req.query;
     let parseData = [];
 
     try {
@@ -347,12 +391,12 @@ module.exports = {
         include: [
           {
             model: TipoProducto,
-            as: 'ProductoTipo',
+            as: "ProductoTipo",
             where: { tipo },
           },
           {
             model: Categoria,
-            as: 'ProductoCategoria',
+            as: "ProductoCategoria",
           },
         ],
         where: {
@@ -360,7 +404,7 @@ module.exports = {
             [Op.substring]: nombre,
           },
         },
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
       });
 
       if (productos.length) {
@@ -397,9 +441,23 @@ module.exports = {
             });
 
             if (getLog) {
-              const { idProductoLog, stock, costo, precio, reorden } = getLog;
+              const {
+                idProductoLog,
+                stock,
+                costo,
+                precio,
+                reorden,
+                cantCompra,
+              } = getLog;
 
-              parseGetLog = { idProductoLog, stock, costo, precio, reorden };
+              parseGetLog = {
+                idProductoLog,
+                stock,
+                costo,
+                precio,
+                reorden,
+                cantCompra,
+              };
             }
 
             return parseData.push({
@@ -475,22 +533,21 @@ module.exports = {
   // "costo": 0,
   // "precio": 0,
   // "reorden": 20
+  // "cantCompra": 20
 
   // }
   async updateProducto(req, res) {
     const {
       idProducto,
-      nombre = '',
-      descripcion = '',
+      nombre = "",
+      descripcion = "",
       idTipoProducto,
       idCategoria,
       idImagenProducto,
       idProductoLog,
-      url = '',
-      // stock = 0,
-      // costo = 0,
-      // precio = 0,
+      url = "",
       reorden = 20,
+      cantCompra = 10,
     } = req.body;
     let data = {};
 
@@ -500,7 +557,7 @@ module.exports = {
       });
 
       if (!productoExit) {
-        return res.status(409).send({ message: 'Este Producto no existe' });
+        return res.status(409).send({ message: "Este Producto no existe" });
       }
 
       data = await Producto.update(
@@ -524,9 +581,7 @@ module.exports = {
 
         await ProductoLog.update(
           {
-            // stock,
-            // costo,
-            // precio,
+            cantCompra,
             reorden,
             idProducto,
           },
@@ -549,7 +604,7 @@ module.exports = {
 
       await ProductoLog.destroy({ where: { idProductoLog } });
 
-      return res.status(201).send({ data: '1' });
+      return res.status(201).send({ data: "1" });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }

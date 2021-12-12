@@ -30,6 +30,7 @@ const itebisRoute = require('./itebis/route');
 const unidadMedidaRoute = require('./UnidadMedida/route');
 const metodoPagoRoute = require('./metodoPago/route');
 const dasboardRoute = require('./dasboard/route');
+const pedidoRoute = require('./Pedido/route');
 
 const router = Router();
 
@@ -63,5 +64,6 @@ router.use('/itebis', itebisRoute);
 router.use('/unidadMedida', unidadMedidaRoute);
 router.use('/typePago', metodoPagoRoute);
 router.use('/dasboard', dasboardRoute);
+router.use('/pedido', pedidoRoute);
 
 module.exports = router;
