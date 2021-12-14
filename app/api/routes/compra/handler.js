@@ -156,6 +156,7 @@ module.exports = {
     try {
       const compra = await Compra.findAll({
         where: { status: true },
+        order: [['createdAt', 'DESC']],
         include: [
           {
             model: Suplidor,

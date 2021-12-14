@@ -99,9 +99,10 @@ module.exports = {
   },
   async getPedidosByStatus(req, res) {
     const { status = "Proceso" } = req.params;
-    let getData = [];
+    let parseData = [];
     try {
       const pedidos = await Pedido.findAll({
+        order: [['updatedAt', 'DESC']],
         include: [
           {
             model: Suplidor,
@@ -134,10 +135,11 @@ module.exports = {
         pedidos.map((comp) => {
           const {
             numPedido,
-            idSuplidor,
             total,
             status,
             createdAt,
+            fechaEntrega,
+            idSuplidor,
             PedidoSuplidor: {
               SuplidorPersona: {
                 apellido,
@@ -147,25 +149,24 @@ module.exports = {
             PedidoDetalle,
           } = comp;
 
-          const getDetalle = PedidoDetalle.map(
-            ({
-              cantidad,
-              precio,
-              DetallePedidoProducto: { nombre, descripcion },
-            }) => ({
-              cantidad,
-              precio,
-              nombre,
-              descripcion,
-            })
-          );
-
+          let getDetalle = [];
+          if (PedidoDetalle.length) {
+            getDetalle = PedidoDetalle.map(
+              ({
+                idProducto,
+                cantidad,
+                precio,
+                DetallePedidoProducto: { nombre, descripcion },
+              }) => ({ cantidad, precio, nombre, descripcion, idProducto })
+            );
+          }
           return parseData.push({
             numPedido,
-            idSuplidor,
             total,
             status,
+            idSuplidor,
             createdAt,
+            fechaEntrega,
             apellido,
             nombre,
             detalle: getDetalle,
@@ -173,7 +174,7 @@ module.exports = {
         });
       }
 
-      return res.status(201).send({ data: getData });
+      return res.status(201).send({ data: parseData });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -201,7 +202,7 @@ module.exports = {
         await Pedido.update(
           {
             status,
-            fechaEntrega: hoy,
+            fechaEntrega: '2021-01-20 03:08:35.889+00',
           },
           { where: { numPedido } }
         );

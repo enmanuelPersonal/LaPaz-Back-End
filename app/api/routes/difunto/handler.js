@@ -153,6 +153,7 @@ module.exports = {
 
     try {
       const { idPersona } = await Pariente.findOne({
+        order: [['updatedAt', 'DESC']],
         include: [
           {
             model: Identidad,

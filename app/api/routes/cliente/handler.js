@@ -168,6 +168,7 @@ module.exports = {
 
     try {
       const client = await Cliente.findAll({
+        order: [['updatedAt', 'DESC']],
         include: [
           personClientParams,
           {

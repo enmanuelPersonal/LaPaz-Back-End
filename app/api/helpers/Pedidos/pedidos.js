@@ -14,6 +14,7 @@ const { personSuplidorParams } = require("../../utils/constant");
 const dateDiff = require("../../utils/dateDiff");
 const { correoPedido } = require("../correos/sendPedido");
 const { pedidosByPrecios } = require("./pedidosByPrecios");
+const { pedidosByTiempo } = require("./pedidosByTiempo");
 
 module.exports = {
   async createPedido({ detalle }) {
@@ -59,88 +60,128 @@ module.exports = {
         });
 
         if (isRequerido) {
-          await Promise.all(
-            getProdutos.map(async (idProducto) => {
-              const getDetallePedidoProducto = await DetallePedido.findAll({
-                include: [
-                  {
-                    model: Pedido,
-                    as: "DetallePedidoos",
-                    where: { status: "Completado" },
-                  },
-                ],
-                where: { idProducto },
-              });
+          console.log("--------------------------");
+          const { data, error } = await pedidosByTiempo({
+            getProdutoSuplidor,
+            detalle: getProdutos,
+          });
 
-              if (getDetallePedidoProducto.length) {
-                getDetallePedidoProducto.map(
-                  async ({ numPedido, idProducto, precio }) => {
-                    const { cantCompra } = await ProductoLog.findOne({
-                      where: { idProducto },
-                    });
+          if (!error) {
+            console.log("No hay errores ", data);
+            getProdutoSuplidor = data;
+          }
+          // console.log("Estoy aqui");
+          // await Promise.all(
+          //   getProdutos.map(async (idProducto) => {
+          //     const getDetallePedidoProducto = await DetallePedido.findAll({
+          //       include: [
+          //         {
+          //           model: Pedido,
+          //           as: "DetallePedidoos",
+          //           where: { status: "Completado" },
+          //         },
+          //       ],
+          //       where: { idProducto },
+          //     });
 
-                    const { nombre, descripcion } = await Producto.findOne({
-                      where: { idProducto },
-                    });
+          //     if (getDetallePedidoProducto.length) {
+          //       getDetallePedidoProducto.map(
+          //         async ({ numPedido, idProducto, precio }) => {
+          //           console.log("Estoy aqui 1", idProducto, precio);
+          //           const { cantCompra } = await ProductoLog.findOne({
+          //             where: { idProducto },
+          //           });
 
-                    const { url } = await ImagenProducto.findOne({
-                      where: { idProducto },
-                    });
+          //           const { nombre, descripcion } = await Producto.findOne({
+          //             where: { idProducto },
+          //           });
 
-                    const { createAt, fechaEntrega, idSuplidor } =
-                      await Pedido.findOne({
-                        where: {
-                          [Op.and]: [{ status: "Completado" }, { numPedido }],
-                        },
-                      });
-                    getDias = dateDiff({
-                      inicio: createAt,
-                      fin: fechaEntrega,
-                    });
-                    if (getProdutoSuplidor.hasOwnProperty([idProducto])) {
-                      if (getProdutoSuplidor[idProducto]["dias"] > getDias) {
-                        getProdutoSuplidor[idProducto] = {
-                          dias: getDias,
-                          idSuplidor,
-                          precio,
-                          cantidad: cantCompra,
-                          imagen: url,
-                          nombre,
-                          descripcion,
-                        };
-                      }
-                    } else {
-                      getProdutoSuplidor[idProducto] = {
-                        dias: getDias,
-                        idSuplidor,
-                        precio,
-                        cantidad: cantCompra,
-                        imagen: url,
-                        nombre,
-                        descripcion,
-                      };
-                    }
-                  }
-                );
-              } else {
-                console.log("ESTOY EN PEDIDO 6");
-                const { data, error } = await pedidosByPrecios({
-                  idProducto,
-                  getProdutoSuplidor,
-                });
+          //           const { url } = await ImagenProducto.findOne({
+          //             where: { idProducto },
+          //           });
 
-                if (!error) {
-                  getProdutoSuplidor = data;
-                }
-              }
-            })
-          );
+          //           const { createdAt, fechaEntrega, idSuplidor } =
+          //             await Pedido.findOne({
+          //               where: {
+          //                 [Op.and]: [{ status: "Completado" }, { numPedido }],
+          //               },
+          //             });
+
+          //           getDias = dateDiff({
+          //             inicio: createdAt,
+          //             fin: fechaEntrega,
+          //           });
+          //           console.log("Diferencia de fecha", getDias);
+          //           if (getProdutoSuplidor.hasOwnProperty([idProducto])) {
+          //             console.log("Estoy en el if ", {
+          //               dias: getDias,
+          //               idSuplidor,
+          //               precio,
+          //               cantidad: cantCompra,
+          //               imagen: url,
+          //               nombre,
+          //               descripcion,
+          //             });
+          //             if (getProdutoSuplidor[idProducto]["dias"] > getDias) {
+          //               console.log("Estoy en el if de los dias ", {
+          //                 dias: getDias,
+          //                 idSuplidor,
+          //                 precio,
+          //                 cantidad: cantCompra,
+          //                 imagen: url,
+          //                 nombre,
+          //                 descripcion,
+          //               });
+          //               getProdutoSuplidor[idProducto] = {
+          //                 dias: getDias,
+          //                 idSuplidor,
+          //                 precio,
+          //                 cantidad: cantCompra,
+          //                 imagen: url,
+          //                 nombre,
+          //                 descripcion,
+          //               };
+          //             }
+          //           } else {
+          //             console.log("Estoy en el else ", {
+          //               dias: getDias,
+          //               idSuplidor,
+          //               precio,
+          //               cantidad: cantCompra,
+          //               imagen: url,
+          //               nombre,
+          //               descripcion,
+          //             });
+          //             getProdutoSuplidor[idProducto] = {
+          //               dias: getDias,
+          //               idSuplidor,
+          //               precio,
+          //               cantidad: cantCompra,
+          //               imagen: url,
+          //               nombre,
+          //               descripcion,
+          //             };
+          //           }
+          //         }
+          //       );
+          //     } else {
+          //       const { data, error } = await pedidosByPrecios({
+          //         idProducto,
+          //         getProdutoSuplidor,
+          //       });
+
+          //       if (!error) {
+          //         getProdutoSuplidor = data;
+          //       }
+          //     }
+          //   })
+          // );
         } else {
           const { data, error } = await pedidosByPrecios({
             getProdutoSuplidor,
             detalle: getProdutos,
           });
-          console.log("ESTOY EN PEDIDO 9", data);
+
           if (!error) {
             getProdutoSuplidor = data;
           }
@@ -182,16 +223,19 @@ module.exports = {
             ];
           }
         });
-
+        console.log("ESTOY AAAAAAAAA");
         await Promise.all(
           Object.keys(getSuplidores).map(async (key) => {
+            console.log("Creando el pedido");
             const { numPedido } = await Pedido.create({
               total: totalSuplidor[key],
               status: "Proceso",
               idSuplidor: key,
+              createdAt: "2021-01-12 03:08:35.889+00",
             });
 
             getSuplidores[key].map(async ({ idProducto, cantidad, precio }) => {
+              console.log("Creando el detalle");
               await DetallePedido.create({
                 numPedido,
                 idProducto,

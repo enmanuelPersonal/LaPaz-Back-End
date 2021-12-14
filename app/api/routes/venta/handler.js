@@ -154,7 +154,7 @@ module.exports = {
           hora: `${getDate.getHours()}:${getDate.getMinutes()}:${getDate.getSeconds()}`,
         });
       }
-      
+
       await createPedido({ detalle });
 
       return res.status(201).send({ data });
@@ -258,6 +258,7 @@ module.exports = {
 
     try {
       const factura = await Factura.findAll({
+        order: [["updatedAt", "DESC"]],
         include: [
           {
             model: Cliente,
@@ -349,6 +350,7 @@ module.exports = {
       });
 
       const compra = await Factura.findAll({
+        order: [["updatedAt", "DESC"]],
         include: [
           {
             model: DetalleFactura,
