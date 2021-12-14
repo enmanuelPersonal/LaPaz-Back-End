@@ -15,7 +15,6 @@ module.exports = {
 
     try {
       if (detalle.length) {
-        console.log("Estoy aqui");
         await Promise.all(
           detalle.map(async (idProducto) => {
             const getDetallePedidoProducto = await DetallePedido.findAll({
@@ -33,7 +32,6 @@ module.exports = {
               await Promise.all(
                 getDetallePedidoProducto.map(
                   async ({ numPedido, idProducto, precio }) => {
-                    console.log("Estoy aqui 1", idProducto, precio);
                     const { cantCompra } = await ProductoLog.findOne({
                       where: { idProducto },
                     });
@@ -57,29 +55,11 @@ module.exports = {
                       inicio: createdAt,
                       fin: fechaEntrega,
                     });
-                    console.log("Diferencia de fecha", getDias);
+
                     if (getProdutoSuplidorTemp.hasOwnProperty([idProducto])) {
-                      console.log("Estoy en el if ", {
-                        dias: getDias,
-                        idSuplidor,
-                        precio,
-                        cantidad: cantCompra,
-                        imagen: url,
-                        nombre,
-                        descripcion,
-                      });
                       if (
                         getProdutoSuplidorTemp[idProducto]["dias"] > getDias
                       ) {
-                        console.log("Estoy en el if de los dias ", {
-                          dias: getDias,
-                          idSuplidor,
-                          precio,
-                          cantidad: cantCompra,
-                          imagen: url,
-                          nombre,
-                          descripcion,
-                        });
                         getProdutoSuplidorTemp[idProducto] = {
                           dias: getDias,
                           idSuplidor,
@@ -91,15 +71,6 @@ module.exports = {
                         };
                       }
                     } else {
-                      console.log("Estoy en el else ", {
-                        dias: getDias,
-                        idSuplidor,
-                        precio,
-                        cantidad: cantCompra,
-                        imagen: url,
-                        nombre,
-                        descripcion,
-                      });
                       getProdutoSuplidorTemp[idProducto] = {
                         dias: getDias,
                         idSuplidor,
@@ -116,7 +87,7 @@ module.exports = {
             } else {
               const { data, error } = await pedidosByPrecios({
                 idProducto,
-                getProdutoSuplidorTemp,
+                getProdutoSuplidor: getProdutoSuplidorTemp,
               });
 
               if (!error) {

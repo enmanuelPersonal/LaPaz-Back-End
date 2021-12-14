@@ -202,7 +202,7 @@ module.exports = {
         await Pedido.update(
           {
             status,
-            fechaEntrega: '2021-01-20 03:08:35.889+00',
+            fechaEntrega: hoy,
           },
           { where: { numPedido } }
         );

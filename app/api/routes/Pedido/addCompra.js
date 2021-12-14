@@ -40,13 +40,6 @@ module.exports = {
         });
       }
 
-      // if (!tipoPagos.length) {
-      //   return res.status(409).send({
-      //     data: [],
-      //     message: 'Debe tener un tipo de pago.',
-      //   });
-      // }
-
       const { idTipoPago } = await TipoPago.findOne({
         where: { tipo: "Efectivo" },
       });
@@ -54,8 +47,6 @@ module.exports = {
       data = await Compra.create({
         idSuplidor,
         total,
-        createdAt: "2021-01-20 03:08:35.889+00",
-        updatedAt: "2021-01-20 03:08:35.889+00",
       });
 
       const { numCompra } = data;
@@ -72,8 +63,6 @@ module.exports = {
             idProducto,
             cantidad,
             precio,
-            createdAt: "2021-01-20 03:08:35.889+00",
-            updatedAt: "2021-01-20 03:08:35.889+00",
           });
 
           await findOrCreate({ idSuplidor, idProducto });
