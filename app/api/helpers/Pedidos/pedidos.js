@@ -115,16 +115,18 @@ module.exports = {
             ];
           }
         });
-
+        console.log("SUPLIDORES ", getSuplidores);
         await Promise.all(
           Object.keys(getSuplidores).map(async (key) => {
+            console.log("---------------", getSuplidores[key]);
             const { numPedido } = await Pedido.create({
               total: totalSuplidor[key],
               status: "Proceso",
               idSuplidor: key,
             });
-
+            console.log("CREE EL PEDIDO", numPedido);
             getSuplidores[key].map(async ({ idProducto, cantidad, precio }) => {
+              console.log("Registrando detalle", idProducto);
               await DetallePedido.create({
                 numPedido,
                 idProducto,
@@ -132,7 +134,7 @@ module.exports = {
                 precio,
               });
             });
-
+            console.log("TERMINE EL DETALLE");
             const {
               SuplidorPersona: {
                 EntidadPersona: { EntidadCorreo },
@@ -141,12 +143,13 @@ module.exports = {
               where: { idSuplidor: key },
               include: [personSuplidorParams],
             });
-
+            console.log("BUSCANDO EL SUPLIDOR", EntidadCorreo);
             await correoPedido({
               correo: EntidadCorreo[0].correo,
               detalle: getSuplidores[key],
               total: totalSuplidor[key],
             });
+            console.log("SE ENVIO EL CORRE");
           })
         );
       }

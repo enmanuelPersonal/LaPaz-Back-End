@@ -17,7 +17,7 @@ module.exports = {
       });
 
       await stripe.paymentIntents.create({
-        amount,
+        amount: parseInt(amount),
         currency: "USD",
         description,
         payment_method: paymentMethod.id,
